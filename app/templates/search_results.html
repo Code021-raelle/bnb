@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Search Results{% endblock %}
+{% block content %}
+    <h1>Search Results for "{{ search_term }}"</h1>
+    {% if listings %}
+        {% for listing in listings %}
+            <div>
+                <h2><a href="{{ url_for('listing', listing_id=listing.id) }}">{{ listing.title }}</a></h2>
+                <p>{{ listing.description }}</p>
+                <p>Price: {{ listing.price }}</p>
+                <p>Location: {{ listing.location }}</p>
+                <p>Amenities: {{ listing.amenities }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No listings found.</p>
+    {% endif %}
+{% endblock %}

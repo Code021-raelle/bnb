@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ listing.title }}{% endblock %}
+{% block content %}
+    <h1>{{ listing.title }}</h1>
+    <p>{{ listing.description }}</p>
+
+    <h2>Reviews</h2>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.rating.label }}<br>
+            {{ form.rating }}
+        </p>
+        <p>
+            {{ form.comment.label }}<br>
+            {{ form.comment }}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+
+    {% for review in reviews.items %}
+        <div>
+            <p><strong>{{ review.user.username }}</strong> rated it {{ review.rating }} stars</p>
+            <p>{{ review.comment }}</p>
+            <p>{{ review.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+        </div>
+    {% else %}
+        <p>No reviews yet.</p>
+    {% endfor %}
+    <div>
+        {% if reviews.has_prev %}
+            <a href="{{ url_for('listing', listing_id=listing.id, page=reviews.prev_num) }}">Previous</a>
+        {% endif %}
+        {% if reviews.has_next %}
+            <a href="{{ url_for('listing', listing_id=listing.id, page=reviews.next_num) }}">Next</a>
+        {% endif %}
+    </div>
+{% endblock %}

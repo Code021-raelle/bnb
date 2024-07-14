@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Book {{ listing.title }}{% endblock %}
+{% block content %}
+    <h1>Book {{ listing.title }}</h1>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.start_date.label }}<br>
+            {{ form.start_date }}
+        </p>
+        <p>
+            {{ form.end_date.label }}<br>
+            {{ form.end_date }}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}

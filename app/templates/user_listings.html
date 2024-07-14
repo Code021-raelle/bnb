@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{{ user.username }}'s Listings{% endblock %}
+{% block content %}
+    <h1>Listings by {{ user.username }}</h1>
+    {% for listing in listings %}
+        <div>
+            <h2>{{ listing.title }}</h2>
+            <p>{{ listing.description }}</p>
+        </div>
+    {% else %}
+        <p>No listings found</p>
+    {% endfor %}
+
+    <h1>Bookings by {{ user.username }}</h1>
+    {% for booking in bookings %}
+        <div>
+            <h2>{{ booking.listing.title }}</h2>
+            <p>From {{ booking.start_date }} to {{ booking.end_date }}</p>
+        </div>
+    {% else %}
+        <p>No bookings found</p>
+    {% endfor %}
+{% endblock %}

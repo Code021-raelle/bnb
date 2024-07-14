@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Listings{% endblock %}
+{% block content %}
+    <h1>Listings</h1>
+    {% for listing in listings.items %}
+        <div>
+            <h2><a href="{{ url_for('listing', listing_id=listing.id) }}">{{ listing.title }}</a></h2>
+            <p>{{ listing.description }}</p>
+        </div>
+    {% endfor %}
+    <div>
+        {% if listings.has_prev %}
+            <a href="{{ url_for('listings', page=listings.prev_num) }}">Previous</a>
+        {% endif %}
+        {% if listings.has_next %}
+            <a href="{{ url_for('listings', page=listings.next_num) }}">Next</a>
+        {% endif %}
+    </div>
+{% endblock %}

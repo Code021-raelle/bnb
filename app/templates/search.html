@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Search{% endblock %}
+{% block content %}
+    <h1>Search Listings</h1>
+    <form method="POST" action="{{ url_for('search') }}">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.search.label }}<br>
+            {{ form.search(size=32) }}
+        </p>
+        <p>
+            {{ form.min_price.label }}<br>
+            {{ form.min_price }}
+        </p>
+        <p>
+            {{ form.max_price.label }}<br>
+            {{ form.max_price }}
+        </p>
+        <p>
+            {{ form.location.label }}<br>
+            {{ form.location(size=32) }}
+        </p>
+        <p>
+            {{ form.amenities.label }}<br>
+            {{ form.amenities(size=32) }} (comma separated)
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}
