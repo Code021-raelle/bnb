@@ -1,4 +1,5 @@
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileAllowed
 from wtforms.fields import DateField
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField, IntegerField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, NumberRange, Optional
@@ -21,6 +22,7 @@ class LoginForm(FlaskForm):
 
 class ListingForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
+    image = FileField('Image', validators=[FileAllowed(['jpg', 'png'])])
     description = TextAreaField('Description', validators=[DataRequired()])
     submit = SubmitField('Post Listing')
 
@@ -55,4 +57,11 @@ class EditProfileForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email()])
     about_me = TextAreaField('About me', validators=[Length(max=140)])
+    submit = SubmitField('Update')
+
+
+class UpdateUserForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Update')

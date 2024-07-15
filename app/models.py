@@ -1,7 +1,8 @@
 from datetime import datetime
-from app import db, login_manager
+from app import db, login_manager, bcrypt
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.orm import relationship
 
 
 @login_manager.user_loader
@@ -14,18 +15,20 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
-    password = db.Column(db.String(60), nullable=False)
+    password = db.Column(db.String(255), nullable=False)
     listings = db.relationship('Listing', backref='owner', lazy=True)
     is_admin = db.Column(db.Boolean, default=False)
+    message_sent = db.relationship('Message', backref='sender', lazy=True, foreign_keys='Message.sender_id')
+    message_received = db.relationship('Message', backref='recipient', lazy=True, foreign_keys='Message.recipient_id')
 
     def __repr__(self):
         return f'<User {self.username}>'
     
     def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
+        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
 
     def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+        return bcrypt.check_password_hash(self.password, password)
 
 
 class Listing(db.Model):
@@ -33,7 +36,11 @@ class Listing(db.Model):
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    def __repr__(self):
+        return f"Listing('{self.title}', '{self.date_posted}')"
 
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -41,6 +48,8 @@ class Booking(db.Model):
     end_date = db.Column(db.DateTime, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     listing_id = db.Column(db.Integer, db.ForeignKey('listing.id'), nullable=False)
+
+    user = relationship('User', backref='bookings')
 
 
 class Review(db.Model):
@@ -50,6 +59,8 @@ class Review(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     listing_id = db.Column(db.Integer, db.ForeignKey('listing.id'), nullable=False)
+
+    user = db.relationship('User', backref='reviews')
 
     def __repr__(self):
         return f'<Review {self.rating} - {self.comment}>'

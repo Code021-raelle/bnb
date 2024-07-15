@@ -1,19 +1,29 @@
 {% extends "base.html" %}
 {% block title %}Listings{% endblock %}
 {% block content %}
-    <h1>Listings</h1>
-    {% for listing in listings.items %}
-        <div>
-            <h2><a href="{{ url_for('listing', listing_id=listing.id) }}">{{ listing.title }}</a></h2>
-            <p>{{ listing.description }}</p>
+    <div class="container mt-5">
+        <h1 class="my-4 text-center">Listings</h1>
+        <div class="row">
+            {% for listing in listings.items %}
+                <div class="col-md-4 d-flex align-items-stretch">
+                    <div class="card mb-4 shadow-sm">
+                        <img src="{{ url_for('static', filename='images/' ~ listing.image_file) }}" class="card-img-top" alt="{{ listing.title }}">
+                        <div class="card-body">
+                            <h5 class="card-title"><a href="{{ url_for('listing', listing_id=listing.id) }}">{{ listing.title }}</a></h5>
+                            <p class="card-text">{{ listing.description | truncate(100) }}</p>
+                            <a href="{{ url_for('listing', listing_id=listing.id) }}" class="btn btn-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
         </div>
-    {% endfor %}
-    <div>
-        {% if listings.has_prev %}
-            <a href="{{ url_for('listings', page=listings.prev_num) }}">Previous</a>
-        {% endif %}
-        {% if listings.has_next %}
-            <a href="{{ url_for('listings', page=listings.next_num) }}">Next</a>
-        {% endif %}
+        <div class="d-flex justify-content-between mt-4">
+            {% if listings.has_prev %}
+                <a href="{{ url_for('listings', page=listings.prev_num) }}" class="btn btn-secondary">Previous</a>
+            {% endif %}
+            {% if listings.has_next %}
+                <a href="{{ url_for('listings', page=listings.next_num) }}" class="btn btn-secondary">Next</a>
+            {% endif %}
+        </div>
     </div>
 {% endblock %}

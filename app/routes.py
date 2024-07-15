@@ -1,8 +1,13 @@
 from flask import render_template, url_for, flash, redirect, request
 from app import app, db, bcrypt
 from app.forms import RegistrationForm, LoginForm, ListingForm, SearchForm, BookingForm, ReviewForm, MessageForm, EditProfileForm
-from app.models import User, Listing, Review, Message
+from app.models import User, Listing, Review, Message, Booking
 from flask_login import login_user, current_user, logout_user, login_required
+from werkzeug.security import check_password_hash
+from werkzeug.utils import secure_filename
+from PIL import Image
+import secrets
+import os
 
 @app.route("/")
 @app.route("/home")
@@ -49,12 +54,31 @@ def logout():
     return redirect(url_for('home'))
 
 
+def save_picture(form_picture):
+    random_hex = secrets.token_hex(8)
+    _, f_ext = os.path.splitext(form_picture.filename)
+    picture_fn = random_hex + f_ext
+    picture_path = os.path.join(current_app.root_path, 'static/images', picture_fn)
+
+    output_size = (300, 300)
+    i = Image.open(form_picture)
+    i.thumbnail(output_size)
+    i.save(picture_path)
+
+    return picture_fn
+
+
 @app.route("/listing/new", methods=['GET', 'POST'])
 @login_required
 def new_listing():
     form = ListingForm()
     if form.validate_on_submit():
-        listing = Listing(title=form.title.data, description=form.description.data, owner=current_user)
+        if form.image.data:
+            image_file = save_picture(form.image.data)
+        else:
+            image_file = 'default.jpg'
+        
+        listing = Listing(title=form.title.data, description=form.description.data, image_file=image_file, owner=current_user)
         db.session.add(listing)
         db.session.commit()
         flash('Your listing has been created!', 'success')
@@ -127,10 +151,10 @@ def send_message():
             flash('Recipient not found.', 'danger')
     return render_template('send_message.html', title='Send Message', form=form)
 
-@app.route("/inbox")
+@app.route("/inbox", methods=['GET'])
 @login_required
 def inbox():
-    messages = Message.query.filter_by(recipient=current_user).order_by(Message.timestamp.desc()).all()
+    messages = Message.query.filter_by(recipient_id=current_user.id).order_by(Message.timestamp.desc()).all()
     return render_template('inbox.html', title='Inbox', messages=messages)
 
 
@@ -166,17 +190,23 @@ def listings():
 
 @app.route("/listing/<int:listing_id>", methods=['GET', 'POST'])
 def listing(listing_id):
+    user = current_user
     listing = Listing.query.get_or_404(listing_id)
     form = ReviewForm()
     if form.validate_on_submit():
-        review = Review(rating=form.rating.data, comment=form.comment.data, user=current_user, listing=listing)
+        review = Review(
+            rating=form.rating.data,
+            comment=form.comment.data,
+            listing_id=listing.id,
+            user_id = current_user.id
+        )
         db.session.add(review)
         db.session.commit()
         flash('Your review has been submitted!', 'success')
         return redirect(url_for('listing', listing_id=listing.id))
     page = request.args.get('page', 1, type=int)
     reviews = Review.query.filter_by(listing_id=listing.id).order_by(Review.timestamp.desc()).paginate(page=page, per_page=5)
-    return render_template('listing.html', title=listing.title, listing=listing, form=form, reviews=reviews)
+    return render_template('listing.html', title=listing.title, listing=listing, form=form, reviews=reviews, user=user)
 
 
 @app.route('/checkout/<int:listing_id>', methods=['GET', 'POST'])

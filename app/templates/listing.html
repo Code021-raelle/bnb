@@ -1,38 +1,65 @@
 {% extends "base.html" %}
-{% block title %}{{ listing.title }}{% endblock %}
+{% block title %}
+    {% if listing %}
+        {{ listing.title }}
+    {% else %}
+        New Listing
+    {% endif %}
+{% endblock %}
 {% block content %}
-    <h1>{{ listing.title }}</h1>
-    <p>{{ listing.description }}</p>
+    {% if listing %}
+        <h1>{{ listing.title }}</h1>
+        <p>{{ listing.description }}</p>
 
-    <h2>Reviews</h2>
-    <form method="POST">
-        {{ form.hidden_tag() }}
-        <p>
-            {{ form.rating.label }}<br>
-            {{ form.rating }}
-        </p>
-        <p>
-            {{ form.comment.label }}<br>
-            {{ form.comment }}
-        </p>
-        <p>{{ form.submit() }}</p>
-    </form>
+        <h2>Reviews</h2>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <p>
+                {{ form.rating.label }}<br>
+                {{ form.rating }}
+            </p>
+            <p>
+                {{ form.comment.label }}<br>
+                {{ form.comment }}
+            </p>
+            <p>{{ form.submit() }}</p>
+        </form>
 
-    {% for review in reviews.items %}
+        {% for review in reviews.items %}
+            <div>
+                <p><strong>{{ review.user.username }}</strong> rated it {{ review.rating }} stars</p>
+                <p>{{ review.comment }}</p>
+                <p>{{ review.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+            </div>
+        {% else %}
+            <p>No reviews yet.</p>
+        {% endfor %}
         <div>
-            <p><strong>{{ review.user.username }}</strong> rated it {{ review.rating }} stars</p>
-            <p>{{ review.comment }}</p>
-            <p>{{ review.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+            {% if reviews.has_prev %}
+                <a href="{{ url_for('listing', listing_id=listing.id, page=reviews.prev_num) }}">Previous</a>
+            {% endif %}
+            {% if reviews.has_next %}
+                <a href="{{ url_for('listing', listing_id=listing.id, page=reviews.next_num) }}">Next</a>
+            {% endif %}
         </div>
     {% else %}
-        <p>No reviews yet.</p>
-    {% endfor %}
-    <div>
-        {% if reviews.has_prev %}
-            <a href="{{ url_for('listing', listing_id=listing.id, page=reviews.prev_num) }}">Previous</a>
-        {% endif %}
-        {% if reviews.has_next %}
-            <a href="{{ url_for('listing', listing_id=listing.id, page=reviews.next_num) }}">Next</a>
-        {% endif %}
-    </div>
+        <h1>Create a New Listing</h1>
+        <form method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <div>
+                {{ form.title.label }}<br>
+                {{ form.title }}
+            </div>
+            <div class="form-group">
+                {{ form.image.label(class="form-label") }}
+                {{ form.image(class="form-control-file") }}
+            </div>
+            <div>
+                {{ form.description.label }}<br>
+                {{ form.description }}
+            </div>
+            <!-- Add other form fields here -->
+            <button type="submit" class="btn btn-primary">{{ form.submit() }}</button>
+        </form>
+    {% endif %}
 {% endblock %}
