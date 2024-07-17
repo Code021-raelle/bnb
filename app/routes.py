@@ -1,11 +1,12 @@
 from flask import render_template, url_for, flash, redirect, request
-from app import app, db, bcrypt
+from app import app, db, bcrypt, oauth
 from app.forms import RegistrationForm, LoginForm, ListingForm, SearchForm, BookingForm, ReviewForm, MessageForm, EditProfileForm
 from app.models import User, Listing, Review, Message, Booking
 from flask_login import login_user, current_user, logout_user, login_required
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 from PIL import Image
+import requests
 import secrets
 import os
 
@@ -46,6 +47,61 @@ def login():
         else:
             flash('Login Unsuccessful. Please check email and password', 'danger')
     return render_template('login.html', title='Login', form=form)
+
+
+@app.route('/google_login')
+def google_login():
+    if not google.authorized:
+        return redirect(url_for('google.login'))
+    resp = google.get('/plus/v1/people/me')
+    assert resp.ok, resp.text
+    user_info = resp.json()
+    user = User.query.filter_by(email=user_info['emails'][0]['value']).first()
+    if user is None:
+        user = User(email=user_info['emails'][0]['value'], username=user_info['displayName'])
+        db.session.add(user)
+        db.session.commit()
+    login_user(user)
+    return redirect(url_for('home'))
+
+
+@app.route('/facebook_login')
+def facebook_login():
+    if not facebook.authorized:
+        return redirect(url_for('facebook.login'))
+    resp = facebook.get('/me?fields=name,email')
+    assert resp.ok, resp.text
+    user_info = resp.json()
+    user = User.query.filter_by(email=user_info['email']).first()
+    if user is None:
+        user = User(email=user_info['email'], username=user_info['name'])
+        db.session.add(user)
+        db.session.commit()
+    login_user(user)
+    return redirect(url_for('home'))
+
+
+@app.route('/apple_login')
+def apple_login():
+    redirect_uri = url_for('apple_authorize', _external=True)
+    return oauth.apple.authorize_redirect(redirect_uri)
+
+
+@app.route('/apple/authorize')
+def apple_authorize():
+    token = oauth.apple.authorize_access_token()
+    resp = requests.get('https://appleid.apple.com/auth/verifyCredentials', headers={'Authorization'
+                                                                                     ': Bearer '
+                                                                                     + token['access_token']})
+    assert resp.ok, resp.text
+    user_info = resp.json()
+    user = User.query.filter_by(email=user_info['email']).first()
+    if user is None:
+        user = User(email=user_info['email'], username=user_info['name'])
+        db.session.add(user)
+        db.session.commit()
+    login_user(user)
+    return redirect(url_for('home'))
 
 
 @app.route("/logout")
@@ -119,7 +175,12 @@ def book_listing(listing_id):
     listing = Listing.query.get_or_404(listing_id)
     form = BookingForm()
     if form.validate_on_submit():
-        booking = Booking(start_date=form.start_date.data, end_date=form.end_date.data, user=current_user, listing=listing)
+        booking = Booking(
+            start_date=form.start_date.data,
+            end_date=form.end_date.data,
+            user=current_user,
+            listing=listing
+        )
         db.session.add(booking)
         db.session.commit()
         flash('Your booking has been created!', 'success')
@@ -170,15 +231,26 @@ def edit_profile():
     form = EditProfileForm()
     if form.validate_on_submit():
         current_user.username = form.username.data
+        current_user.first_name = form.first_name.data
+        current_user.last_name = form.last_name.data
         current_user.email = form.email.data
         current_user.about_me = form.about_me.data
+
+        if form.image_file.data:
+            filename = secure_filename(form.image_file.data.filename)
+            form.image_file.data.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            current_user.image_file = filename
+        
         db.session.commit()
         flash('Your profile has been updated!', 'success')
         return redirect(url_for('profile', username=current_user.username))
     elif request.method == 'GET':
         form.username.data = current_user.username
+        form.first_name.data = current_user.first_name
+        form.last_name.data = current_user.last_name
         form.email.data = current_user.email
         form.about_me.data = current_user.about_me
+        form.image_file.data = current_user.image_file
     return render_template('edit_profile.html', title='Edit Profile', form=form)
 
 

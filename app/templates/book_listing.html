@@ -1,17 +1,21 @@
 {% extends "base.html" %}
-{% block title %}Book {{ listing.title }}{% endblock %}
+{% block title %}Book Listing{% endblock %}
 {% block content %}
-    <h1>Book {{ listing.title }}</h1>
-    <form method="POST">
-        {{ form.hidden_tag() }}
-        <p>
-            {{ form.start_date.label }}<br>
-            {{ form.start_date }}
-        </p>
-        <p>
-            {{ form.end_date.label }}<br>
-            {{ form.end_date }}
-        </p>
-        <p>{{ form.submit() }}</p>
-    </form>
+    <div class="container">
+        <h1 class="my-4">Book {{ listing.title }}</h1>
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.start_date.label(class="form-label") }}
+                {{ form.start_date(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.end_date.label(class="form-label") }}
+                {{ form.end_date(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
 {% endblock %}

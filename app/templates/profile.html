@@ -2,9 +2,24 @@
 {% block title %}{{ user.username }}'s Profile{% endblock %}
 {% block content %}
     <h1>{{ user.username }}'s Profile</h1>
+    {% if current_user.image %}
+        <div class="form-group">
+            <img src="{{ url_for('static', filename='uploads/' + current_user.image) }}" alt="Profile Image" class="img-thumbnail">
+        </div>
+    {% else %}
+        <div class="form-group">
+            <p>No profile image available</p>
+        </div>
+    {% endif %}
     <p>Email: {{ user.email }}</p>
     <p>About me: {{ user.about_me }}</p>
-    <p>Member since: {{ user.member_since.strftime('%Y-%m-%d') }}</p>
+    <p>Member since: 
+        {% if user.member_since %}
+            {{ user.member_since.strftime('%Y-%m-%d') }}
+        {% else %}
+            Not available
+        {% endif %}
+    </p>
     {% if user == current_user %}
         <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">Edit Profile</a>
     {% endif %}

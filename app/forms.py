@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileAllowed
+from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms.fields import DateField
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField, IntegerField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, NumberRange, Optional
@@ -54,7 +54,10 @@ class MessageForm(FlaskForm):
 
 
 class EditProfileForm(FlaskForm):
+    image_file = FileField('Profile Image', validators=[FileRequired(), FileAllowed(['jpg', 'png'], 'Images only!')])
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
+    first_name = StringField('First Name', validators=[DataRequired(), Length(min=2, max=20)])
+    last_name = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email()])
     about_me = TextAreaField('About me', validators=[Length(max=140)])
     submit = SubmitField('Update')

@@ -25,6 +25,11 @@
                                 {{ form.password(class="form-control") }}
                             </div>
                             <button type="submit" class="btn btn-primary">Login</button>
+                            <hr>
+                            <a class="btn btn-primary" href="{{ url_for('google.login') }}">Login with Google</a><hr>
+                            <a class="btn btn-primary" href="{{ url_for('facebook.login') }}">Login with Facebook</a><hr>
+                            <a class="btn btn-primary" href="{{ url_for('apple_login') }}">Login with Apple</a>
+
                         </form>
                     </div>
                 </div>
