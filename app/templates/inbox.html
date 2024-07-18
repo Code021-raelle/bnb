@@ -2,13 +2,59 @@
 {% block title %}Inbox{% endblock %}
 {% block content %}
     <h1>Inbox</h1>
-    {% for message in messages %}
-        <div>
-            <p><strong>{{ message.sender.username }}</strong> sent:</p>
-            <p>{{ message.body }}</p>
-            <p>{{ message.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+    <div class="list-group">
+        {% for message in messages %}
+            <div class="list-group-item">
+                <h5 class="mb-1"><a href="{{ url_for('chat', username=message.sender.username) }}"><strong>{{ message.sender.username }}</strong></a> sent:</h5>
+                <p class="mb-1">{{ message.body }}</p>
+                <small class="text-muted">{{ message.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                <button type="button" href="{{ url_for('chat', username=message.sender.username) }}" class="btn btn-primary btn-sm mt-2 reply-btn" data-sender="{{ message.sender.username }}">Reply</button>
+            </div>
+        {% else %}
+            <div class="list-group-item">
+                <p>No messages yet.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Modal for reply -->
+    <div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="replyModalLabel">Reply to <span id="replyTo"></span></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="{{ url_for('reply_message') }}">
+                        <input type="hidden" name="recipient" id="recipient" value="">
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea class="form-control" id="message" name="message" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Reply</button>
+                    </form>
+                </div>
+            </div>
         </div>
-    {% else %}
-        <p>No messages yet.</p>
-    {% endfor %}
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const replyButtons = document.querySelectorAll('.reply-btn');
+            replyButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const sender = this.getAttribute('data-sender');
+                    document.getElementById('replyTo').innerText = sender;
+                    document.getElementById('recipient').value = sender;
+                    $('#replyModal').modal('show');
+                });
+            });
+        });
+    </script>
 {% endblock %}

@@ -1,24 +1,26 @@
 {% extends "base.html" %}
 {% block title %}{{ user.username }}'s Profile{% endblock %}
 {% block content %}
-    <h1>{{ user.username }}'s Profile</h1>
+    <i><h1>{{ user.username }}'s Profile</h1></i>
     {% if current_user.image %}
         <div class="form-group">
             <img src="{{ url_for('static', filename='uploads/' + current_user.image) }}" alt="Profile Image" class="img-thumbnail">
         </div>
     {% else %}
         <div class="form-group">
-            <p>No profile image available</p>
+            <b><p>No profile image available</p></b>
         </div>
     {% endif %}
-    <p>Email: {{ user.email }}</p>
-    <p>About me: {{ user.about_me }}</p>
-    <p>Member since: 
+    <p><b><h5>First Name:</h5></b> <i>{{ user.first_name }}</i></p>
+    <p><b><h5>Last Name:</h5></b> <i>{{ user.last_name }}</i></p>
+    <p><b><h5>Email:</h5></b> <i>{{ user.email }}</i></p>
+    <p><b><h5>About me:</h5></b> <i>{{ user.about_me }}</i></p>
+    <p><b><h5>Member since:</h5></b><i>
         {% if user.member_since %}
             {{ user.member_since.strftime('%Y-%m-%d') }}
         {% else %}
             Not available
-        {% endif %}
+        {% endif %} </i>
     </p>
     {% if user == current_user %}
         <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">Edit Profile</a>

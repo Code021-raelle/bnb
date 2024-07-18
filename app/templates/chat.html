@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Chats{% endblock %}
+{% block content %}
+    <div class="chat-container">
+        <div class="chat-header">      
+            <i><h1>{{ user.username }}</h1></i>
+        </div>
+        <div class="chat-messages">
+            
+            {% for message in messages %}
+                <div class="chat-message {% if message.sender == current_user %}sent{% else %}received{% endif %}">
+                    <div class="chat-message-content">
+                        <img src="{{ url_for('static', filename='images/profile_placeholder.png') }}" alt="profile picture" class="chat-message-avatar">
+                        <div class="chat-message-bubble">
+                            <p>{{ message.body }}</p>
+                            <span class="chat-message-timestamp">{{ message.timestamp.strftime('%H:%M') }}</span>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <p class="no-messages">No messages yet.</p>
+            {% endfor %}
+        </div>
+        <div class="chat-reply">
+            <form method="POST" action="{{ url_for('reply_message') }}">
+                <input type="hidden" name="recipient" id="recipient" value="{{ user.username }}">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="message" name="message" placeholder="Type a message" required>
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for reply -->
+    <div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="replyModalLabel">Reply to <span id="replyTo"></span></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="{{ url_for('reply_message') }}">
+                        <input type="hidden" name="recipient" id="modal-recipient" value="">
+                        <div class="form-group">
+                            <label for="modal-message">Message</label>
+                            <textarea class="form-control" id="modal-message" name="message" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Reply</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const replyButtons = document.querySelectorAll('.reply-btn');
+            replyButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const sender = this.getAttribute('data-sender');
+                    document.getElementById('replyTo').innerText = sender;
+                    document.getElementById('modal-recipient').value = sender;
+                    $('#replyModal').modal('show');
+                });
+            });
+        });
+    </script>
+{% endblock %}

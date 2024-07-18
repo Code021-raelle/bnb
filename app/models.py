@@ -26,6 +26,8 @@ class User(db.Model, UserMixin):
     member_since = db.Column(db.DateTime, default=datetime.utcnow)
     message_sent = db.relationship('Message', backref='sender', lazy=True, foreign_keys='Message.sender_id')
     message_received = db.relationship('Message', backref='recipient', lazy=True, foreign_keys='Message.recipient_id')
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
     #last_message_read_time = db.Column(db.DateTime, default=datetime.utcnow)
     #is_active = db.Column(db.Boolean, default=True)
     #is_deleted = db.Column(db.Boolean, default=False)
@@ -93,3 +95,10 @@ class Message(db.Model):
 
     def __repr__(self):
         return f'<Message {self.body}>'
+
+
+class Chat(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)

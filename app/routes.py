@@ -1,7 +1,7 @@
-from flask import render_template, url_for, flash, redirect, request
+from flask import render_template, url_for, flash, redirect, request, jsonify, current_app
 from app import app, db, bcrypt, oauth
 from app.forms import RegistrationForm, LoginForm, ListingForm, SearchForm, BookingForm, ReviewForm, MessageForm, EditProfileForm
-from app.models import User, Listing, Review, Message, Booking
+from app.models import User, Listing, Review, Message, Booking, Chat
 from flask_login import login_user, current_user, logout_user, login_required
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
@@ -26,10 +26,23 @@ def register():
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         user = User(username=form.username.data, email=form.email.data, password=hashed_password)
-        db.session.add(user)
-        db.session.commit()
-        flash('Your account has been created!', 'success')
-        return redirect(url_for('login'))
+        username = form.username.data
+        email = form.email.data
+
+        existing_username = User.query.filter_by(username=username).first()
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_username:
+            flash('Username is taken', 'danger')
+        elif existing_user:
+            flash('You have an account with us. Please login.', 'danger')
+            return redirect(url_for('login'))
+        else:
+            new_user = User(username=username, email=email)
+            new_user.set_password(hashed_password)
+            db.session.add(user)
+            db.session.commit()
+            flash('Your account has been created!', 'success')
+            return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
 
@@ -42,6 +55,7 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
+            flash('Logged in successfully.', 'success')
             next_page = request.args.get('next')
             return redirect(next_page) if next_page else redirect(url_for('home'))
         else:
@@ -90,9 +104,7 @@ def apple_login():
 @app.route('/apple/authorize')
 def apple_authorize():
     token = oauth.apple.authorize_access_token()
-    resp = requests.get('https://appleid.apple.com/auth/verifyCredentials', headers={'Authorization'
-                                                                                     ': Bearer '
-                                                                                     + token['access_token']})
+    resp = requests.get('https://appleid.apple.com/auth/verifyCredentials', headers={'Authorization': 'Bearer ' + token['access_token']})
     assert resp.ok, resp.text
     user_info = resp.json()
     user = User.query.filter_by(email=user_info['email']).first()
@@ -212,11 +224,60 @@ def send_message():
             flash('Recipient not found.', 'danger')
     return render_template('send_message.html', title='Send Message', form=form)
 
+
+@app.route('/reply_message', methods=['POST'])
+def reply_message():
+    user = current_user
+    recipient_username = request.form.get('recipient')
+    message_body = request.form.get('message')
+    recipient = User.query.filter_by(username=recipient_username).first()
+    if recipient:
+        message = Message(body=message_body, sender=current_user, recipient=recipient)
+        db.session.add(message)
+        db.session.commit()
+        flash('Your reply has been sent!', 'success')
+        return render_template('chat.html', user=user, recipient=recipient)
+    else:
+        flash('Recipient not found!', 'danger')
+    return redirect(url_for('inbox'))
+
+
 @app.route("/inbox", methods=['GET'])
 @login_required
 def inbox():
     messages = Message.query.filter_by(recipient_id=current_user.id).order_by(Message.timestamp.desc()).all()
     return render_template('inbox.html', title='Inbox', messages=messages)
+
+
+@app.route('/inbox/<username>', methods=['GET', 'POST'])
+@login_required
+def chat(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    form = MessageForm()
+    if form.validate_on_submit():
+        message = Message(body=form.body.data, sender=current_user, recipient=user)
+        db.session.add(message)
+        db.session.commit()
+        flash('Your reply has been sent!', 'success')
+    messages = Message.query.filter(
+        (Message.sender_id == current_user.id) & (Message.recipient_id == user.id) |
+        (Message.sender_id == user.id) & (Message.recipient_id == current_user.id)
+    ).order_by(Message.timestamp.asc()).all()
+    return render_template('chat.html', user=user, form=form, messages=messages)
+
+
+@app.route("/review/<int:listing_id>", methods=['GET', 'POST'])
+@login_required
+def add_review(listing_id):
+    listing = Listing.query.get_or_404(listing_id)
+    form = ReviewForm()
+    if form.validate_on_submit():
+        review = Review(rating=form.rating.data, comment=form.comment.data, reviewer=current_user, listing=listing)
+        db.session.add(review)
+        db.session.commit()
+        flash('Your review has been added!', 'success')
+        return redirect(url_for('home'))
+    return render_template('review.html', title='Add Review', form=form, listing=listing)
 
 
 @app.route("/profile/<username>")
@@ -250,8 +311,9 @@ def edit_profile():
         form.last_name.data = current_user.last_name
         form.email.data = current_user.email
         form.about_me.data = current_user.about_me
-        form.image_file.data = current_user.image_file
-    return render_template('edit_profile.html', title='Edit Profile', form=form)
+        #form.image_file.data = current_user.image_file
+    image_file = url_for('static', filename='images/' + current_user.image_file)
+    return render_template('edit_profile.html', title='Edit Profile', form=form, image_file=image_file)
 
 
 @app.route("/listings")
@@ -279,6 +341,33 @@ def listing(listing_id):
     page = request.args.get('page', 1, type=int)
     reviews = Review.query.filter_by(listing_id=listing.id).order_by(Review.timestamp.desc()).paginate(page=page, per_page=5)
     return render_template('listing.html', title=listing.title, listing=listing, form=form, reviews=reviews, user=user)
+
+
+@app.route("/delete_listing/<int:listing_id>", methods=['GET', 'POST'])
+@login_required
+def delete_listing(listing_id):
+    listing = Listing.query.get_or_404(listing_id)
+    if listing.owner != current_user:
+        abort(403)
+    db.session.delete(listing)
+    db.session.commit()
+    flash('Your listing has been deleted!', 'success')
+    return redirect(url_for('home'))
+
+
+@app.route('/save_location', methods=['POST'])
+@login_required
+def save_location():
+    data = request.get_json()
+    latitude = data.get('latitude')
+    longitude = data.get('longitude')
+
+    # save the location data to the user profile or database as needed
+    current_user.latitude = latitude
+    current_user.longitude = longitude
+    db.session.commit()
+
+    return jsonify({'status': 'success'}), 200
 
 
 @app.route('/checkout/<int:listing_id>', methods=['GET', 'POST'])
