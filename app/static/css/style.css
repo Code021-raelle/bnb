@@ -1,12 +1,13 @@
-body {
+/*body {
+    height: 100vh;
+    width: 100vw;
     box-sizing: border-box;
-    margin: 0 auto;
-    background-image: url(../images/icon.svg) no-repeat;
+    margin: 0;
 }
 
 /* Custom CSS for flash messages */
 #flash-messages {
-    position: absolute;
+    position: fixed;
     bottom: 20px;
     right: 20px;
     z-index: 1050; /* Ensure it appears above other content */
@@ -18,6 +19,42 @@ body {
     max-width: 50px; /* Limit the maximum width *
     margin-bottom: 30px; /* Space between multiple alerts 
 }*/
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+.navbar-nav .nav-link {
+    font-size: 1.1rem;
+}
+.jumbotron {
+    height: 600px;
+    background: url('../images/home.jpg') no-repeat center center;
+    background-size: cover;
+    color: white;
+    text-shadow: 2px 2px 4px #000000;
+}
+.jumbotron h1 {
+    font-size: 3rem;
+    justify-content: center;
+    text-align: center;
+}
+.jumbotron p {
+    font-size: 2rem;
+    color: #ffffff;
+}
+.jumbotron-heading, .my-2 {
+    text-align: center;
+    justify-content: center;
+}
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+footer {
+    background-color: #f8f9fa;
+    padding: 1rem 0;
+}
 
 .listing-grid {
     display: flex;
@@ -137,4 +174,21 @@ body {
     padding: 10px;
     background-color: #f8f9fa;
     border-top: 1px solid #ddd;
+}
+
+.review-card {
+    color: #fff;
+    background: url(../images/review.svg) no-repeat center center;
+    background-size: cover;
+    transition: transform 0.1s;
+    border-radius: 0px 50px 0px 50px;
+}
+
+.review-card:hover {
+    transform: scale(2.05);
+}
+
+.review-card .fas,
+.review-card .far {
+    color: #ffc107;
 }

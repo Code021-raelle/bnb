@@ -3,16 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Home Page</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='images/icon.svg') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="preload" href="{{ url_for('static', filename='images/icon.svg') }}" as="image">
 </head>
 <body>
-    <div class="container">
+    <div class="container-fluid p-0">
         <header>
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
-                <a class="navbar-brand" href="#">Gabbys BnB</a>
+                <a class="navbar-brand" href="#">
+                    <img src="{{ url_for('static', filename='images/icon.svg') }}" width="30" height="30" class="d-inline-block align-top" alt="">
+                    BnB
+                </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -51,12 +58,11 @@
         </div>
 
         <main role="main">
-
             <!-- Main content of the home page -->
-            <section class="jumbotron text-center">
+            <section class="jumbotron text-center mb-0">
                 <div class="container">
-                    <h1 class="jumbotron-heading">Welcome to Your App!</h1>
-                    <p class="lead text-muted">This is a simple example of a home page for your Flask application.</p>
+                    <h1 class="jumbotron-heading">Welcome to BnB!</h1>
+                    <p class="lead ">Discover and book amazing places to stay at.</p>
                     <p>
                         <a href="/listings" class="btn btn-primary my-2">View Listings</a>
                         <!-- Add more buttons or links here -->
