@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Set Preferred Currency{% endblock %}
+{% block content %}
+<h1>Set Preferred Currency</h1>
+<form method="POST" action="{{ url_for('set_currency') }}">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.currency.label(class="form-label") }}
+        {{ form.currency(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.submit(class="btn btn-primary") }}
+    </div>
+</form>
+{% endblock %}

@@ -28,6 +28,7 @@ class User(db.Model, UserMixin):
     message_received = db.relationship('Message', backref='recipient', lazy=True, foreign_keys='Message.recipient_id')
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
+    preferred_currency = db.Column(db.String(10), default='USD')
     #last_message_read_time = db.Column(db.DateTime, default=datetime.utcnow)
     #is_active = db.Column(db.Boolean, default=True)
     #is_deleted = db.Column(db.Boolean, default=False)
@@ -52,6 +53,9 @@ class Listing(db.Model):
     description = db.Column(db.Text, nullable=False)
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
+    price = db.Column(db.Integer, nullable=False)
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __repr__(self):

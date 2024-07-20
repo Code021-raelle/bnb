@@ -1,6 +1,6 @@
 from flask import render_template, url_for, flash, redirect, request, jsonify, current_app
 from app import app, db, bcrypt, oauth
-from app.forms import RegistrationForm, LoginForm, ListingForm, SearchForm, BookingForm, ReviewForm, MessageForm, EditProfileForm
+from app.forms import RegistrationForm, LoginForm, ListingForm, SearchForm, BookingForm, ReviewForm, MessageForm, EditProfileForm, PreferredCurrencyForm
 from app.models import User, Listing, Review, Message, Booking, Chat
 from flask_login import login_user, current_user, logout_user, login_required
 from werkzeug.security import check_password_hash
@@ -8,7 +8,10 @@ from werkzeug.utils import secure_filename
 from PIL import Image
 import requests
 import secrets
+import logging
 import os
+
+logging.basicConfig(level=logging.DEBUG)
 
 @app.route("/")
 @app.route("/home")
@@ -146,11 +149,20 @@ def new_listing():
         else:
             image_file = 'default.jpg'
         
-        listing = Listing(title=form.title.data, description=form.description.data, image_file=image_file, owner=current_user)
+        listing = Listing(
+            title=form.title.data,
+            description=form.description.data,
+            image_file=image_file,
+            owner=current_user,
+            currency=form.currency.data,
+            price=form.price.data,
+            latitude=form.latitude.data,
+            longitude=form.longitude.data
+        )
         db.session.add(listing)
         db.session.commit()
         flash('Your listing has been created!', 'success')
-        return redirect(url_for('home'))
+        return redirect(url_for('listings'))
     return render_template('listing.html', title='New Listing', form=form)
 
 
@@ -326,6 +338,14 @@ def listings():
 def listing(listing_id):
     user = current_user
     listing = Listing.query.get_or_404(listing_id)
+    user_currency = current_user.preferred_currency if current_user.is_authenticated else 'USD'
+    
+    if listing.currency != user_currency:
+        converted_price = convert_currency(listing.price, listing.currency, user_currency)
+        price_with_currency = f"{converted_price} {user_currency}"
+    else:
+        price_with_currency = f"{listing.price} {listing.currency}"
+
     form = ReviewForm()
     if form.validate_on_submit():
         review = Review(
@@ -340,7 +360,53 @@ def listing(listing_id):
         return redirect(url_for('listing', listing_id=listing.id))
     page = request.args.get('page', 1, type=int)
     reviews = Review.query.filter_by(listing_id=listing.id).order_by(Review.timestamp.desc()).paginate(page=page, per_page=5)
-    return render_template('listing.html', title=listing.title, listing=listing, form=form, reviews=reviews, user=user)
+    return render_template('listing.html', title=listing.title, listing=listing, form=form, reviews=reviews, user=user, price=converted_price, currency=user_currency, price_with_currency=price_with_currency)
+
+
+def convert_currency(amount, from_currency, to_currency):
+    api_key = '3b1249bc5574e03487c01d2c'
+    url = f"https://v6.exchangerate-api.com/v6/{api_key}/latest/{from_currency}"
+    
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an HTTPError for bad responses (4xx and 5xx)
+        
+        data = response.json()
+        
+        if 'conversion_rates' not in data:
+            logging.error("Conversion rates not found in API response.")
+            raise ValueError("Invalid response from currency conversion API.")
+        
+        if to_currency not in data['conversion_rates']:
+            logging.error(f"Currency '{to_currency}' not found in conversion rates.")
+            raise KeyError(f"Currency '{to_currency}' not found.")
+        
+        rate = data['conversion_rates'][to_currency]
+        return amount * rate
+    
+    except requests.RequestException as e:
+        logging.error(f"Request to currency conversion API failed: {e}")
+        raise ValueError("Failed to fetch conversion rates.")
+    
+    except KeyError as e:
+        logging.error(f"Key error: {e}")
+        raise
+
+    except ValueError as e:
+        logging.error(f"Value error: {e}")
+        raise
+
+
+@app.route('/set_currency', methods=['GET', 'POST'])
+@login_required
+def set_currency():
+    form = PreferredCurrencyForm()
+    if form.validate_on_submit():
+        current_user.preferred_currency = form.currency.data
+        db.session.commit()
+        flash('Preferred currency updated!', 'success')
+        return redirect(url_for('home')) 
+    return render_template('set_currency.html', form=form)
 
 
 @app.route("/delete_listing/<int:listing_id>", methods=['GET', 'POST'])

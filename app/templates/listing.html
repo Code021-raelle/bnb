@@ -7,80 +7,147 @@
     {% endif %}
 {% endblock %}
 {% block content %}
-    <div class="mt-4">
-        {% if listing %}
-            <h1 class="mb-3">{{ listing.title }}</h1>
-            <div class="col-md-4 d-flex align-items-stretch">
-                <img src="{{ url_for('static', filename='images/' ~ listing.image_file) }}" class="card-img-top" alt="{{ listing.title }}">
+<div class="mt-4">
+    {% if listing %}
+        <h1 class="mb-3">{{ listing.title }}</h1>
+        <div class="col-md-4 d-flex align-items-stretch">
+            <img src="{{ url_for('static', filename='images/' ~ listing.image_file) }}" class="card-img-top" alt="{{ listing.title }}">
+        </div>
+        <p>{{ listing.description }}</p>
+        <p>Price: {{ price_with_currency }}</p>
+        
+        <h2 class="mt-4">Location</h2>
+        <div id="map" style="height: 400px;"></div>
+
+        <hr>
+        <h2 class="mt-4">Reviews</h2>
+        <form method="POST" class="mb-4">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.rating.label }}<br>
+                {{ form.rating(class="form-control") }}
             </div>
-            <p>{{ listing.description }}</p>
+            <div class="form-group">
+                {{ form.comment.label }}<br>
+                {{ form.comment(class="form-control") }}
+            </div>
+            {{ form.submit(class="btn btn-primary") }}
+        </form>
 
-            <hr>
-            <h2 class="mt-4">Reviews</h2>
-            <form method="POST" class="mb-4">
-                {{ form.hidden_tag() }}
-                <div class="form-group">
-                    {{ form.rating.label }}<br>
-                    {{ form.rating(class="form-control") }}
-                </div>
-                <div class="form-group">
-                    {{ form.comment.label }}<br>
-                    {{ form.comment(class="form-control") }}
-                </div>
-                {{ form.submit(class="btn btn-primary") }}
-            </form>
-
-            <hr>
-            <div class="row listing-grid">
-                {% for review in reviews.items %}
-                    <div class="col-md-4 mb-4">
-                        <div class="card review-card h-100">
-                            <div class="card-body">
-                                <p><strong><i>{{ review.user.username }}</i></strong>
-                                    {% for i in range(1, review.rating + 1) %}
-                                        <i class="fas fa-star"></i>
-                                    {% endfor %}
-                                    {% for i in range(review.rating + 1, 6) %}
-                                        <i class="far fa-star"></i>
-                                    {% endfor %}
-                                </p>
-                                <p>{{ review.comment }}</p>
-                                <p>{{ review.timestamp.strftime('%Y-%m-%d') }}</p>
-                            </div>
+        <hr>
+        <div class="row listing-grid">
+            {% for review in reviews.items %}
+                <div class="col-md-4 mb-4">
+                    <div class="card review-card h-100">
+                        <div class="card-body">
+                            <p><strong><i>{{ review.user.username }}</i></strong>
+                                {% for i in range(1, review.rating + 1) %}
+                                    <i class="fas fa-star"></i>
+                                {% endfor %}
+                                {% for i in range(review.rating + 1, 6) %}
+                                    <i class="far fa-star"></i>
+                                {% endfor %}
+                            </p>
+                            <p>{{ review.comment }}</p>
+                            <p>{{ review.timestamp.strftime('%Y-%m-%d') }}</p>
                         </div>
                     </div>
-                {% else %}
-                    <p>No reviews yet.</p>
-                {% endfor %}
-            </div>
+                </div>
+            {% else %}
+                <p>No reviews yet.</p>
+            {% endfor %}
+        </div>
 
-            <div class="d-flex justify-content-between">
-                {% if reviews.has_prev %}
-                    <a class="btn btn-secondary" href="{{ url_for('listing', listing_id=listing.id, page=reviews.prev_num) }}">Previous</a>
-                {% endif %}
-                {% if reviews.has_next %}
-                    <a class="btn btn-secondary" href="{{ url_for('listing', listing_id=listing.id, page=reviews.next_num) }}">Next</a>
-                {% endif %}
+        <div class="d-flex justify-content-between">
+            {% if reviews.has_prev %}
+                <a class="btn btn-secondary" href="{{ url_for('listing', listing_id=listing.id, page=reviews.prev_num) }}">Previous</a>
+            {% endif %}
+            {% if reviews.has_next %}
+                <a class="btn btn-secondary" href="{{ url_for('listing', listing_id=listing.id, page=reviews.next_num) }}">Next</a>
+            {% endif %}
+        </div>
+    {% else %}
+        <h1 class="mb-3">Create a New Listing</h1>
+        <form method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.title.label(class="form-label") }}
+                {{ form.title(class="form-control") }}
             </div>
-        {% else %}
-            <h1 class="mb-3">Create a New Listing</h1>
-            <form method="POST" enctype="multipart/form-data">
-                {{ form.hidden_tag() }}
-                <div class="form-group">
-                    {{ form.title.label(class="form-label") }}
-                    {{ form.title(class="form-control") }}
-                </div>
-                <div class="form-group">
-                    {{ form.image.label(class="form-label") }}
-                    {{ form.image(class="form-control-file") }}
-                </div>
-                <div class="form-group">
-                    {{ form.description.label(class="form-label") }}
-                    {{ form.description(class="form-control") }}
-                </div>
-                <!-- Add other form fields here -->
-                {{ form.submit(class="btn btn-primary") }}
-            </form>
-        {% endif %}
-    </div>
+            <div class="form-group">
+                {{ form.image.label(class="form-label") }}
+                {{ form.image(class="form-control-file") }}
+            </div>
+            <div class="form-group">
+                {{ form.description.label(class="form-label") }}
+                {{ form.description(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.price.label(class="form-label") }}
+                {{ form.price(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.longitude.label(class="form-label") }}
+                {{ form.longitude(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.latitude.label(class="form-label") }}
+                {{ form.latitude(class="form-control") }}
+            </div>
+            <div id="map" style="height: 400px;"></div>
+            <!-- Add other form fields here -->
+            {{ form.submit(class="btn btn-primary") }}
+        </form>
+    {% endif %}
+</div>
+
+<script>
+    // Initialize the map
+    document.addEventListener('DOMContentLoaded', function() {
+            mapboxgl.accessToken = 'pk.eyJ1IjoicmFlbGxlcyIsImEiOiJjbHl1M3Fzc2cweXVwMnFzNm5xeGlna213In0.ENF47rwSL_wPYu-SWfhI4Q';
+            var map = new mapboxgl.Map({
+                container: 'map',
+                style: 'mapbox://styles/mapbox/streets-v11',
+                center: [{{ listing.longitude if listing else 0 }}, {{ listing.latitude if listing else 0 }}],
+                zoom: 13
+            });
+
+            {% if listing %}
+                new mapboxgl.Marker()
+                    .setLngLat([{{ listing.longitude }}, {{ listing.latitude }}])
+                    .setPopup(new mapboxgl.Popup({ offset: 25 }).setText('{{ listing.title }}: {{ listing.description }}'))
+                    .addTo(map);
+                map.setCenter([{{ listing.longitude }}, {{ listing.latitude }}]);
+            {% else %}
+                var marker;
+                map.on('click', function(e) {
+                    if (marker) {
+                        marker.setLngLat(e.lngLat);
+                    } else {
+                        marker = new mapboxgl.Marker()
+                            .setLngLat(e.lngLat)
+                            .addTo(map);
+                    }
+                    document.querySelector('input[name="latitude"]').value = e.lngLat.lat;
+                    document.querySelector('input[name="longitude"]').value = e.lngLat.lng;
+                });
+            {% endif %}
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var userLocation = [position.coords.longitude, position.coords.latitude];
+                    map.setCenter(userLocation);
+                    map.setZoom(13);
+                    new mapboxgl.Marker()
+                        .setLngLat(userLocation)
+                        .setPopup(new mapboxgl.Popup({ offset: 25 }).setText('Your location'))
+                        .addTo(map);
+                }, function() {
+                    console.log("Geolocation permission denied.");
+                });
+            } else {
+                console.log("Geolocation is not supported by this browser.");
+            }
+        });
+</script>
 {% endblock %}
