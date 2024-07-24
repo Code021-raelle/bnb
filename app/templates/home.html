@@ -18,7 +18,7 @@
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
                 <a class="navbar-brand" href="#">
                     <img src="{{ url_for('static', filename='images/icon.svg') }}" width="30" height="30" class="d-inline-block align-top" alt="">
-                    BnB
+                    Bed & Breakfast
                 </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -59,11 +59,11 @@
 
         <main role="main">
             <!-- Main content of the home page -->
-            <section class="jumbotron text-center mb-0">
+            <section class="jumbotron text-center mb-0 slide-up">
                 <div class="container">
-                    <h1 class="jumbotron-heading">Welcome to BnB!</h1>
-                    <p class="lead ">Discover and book amazing places to stay at.</p>
-                    <p>
+                    <h1 class="jumbotron-heading slide-up">Welcome to BnB!</h1>
+                    <p class="lead slide-up">Discover and book amazing places to stay at.</p>
+                    <p class="slide-up">
                         <a href="/listings" class="btn btn-primary my-2">View Listings</a>
                         <!-- Add more buttons or links here -->
                     </p>
@@ -71,20 +71,67 @@
             </section>
 
             <!-- Additional sections or content can be added here -->
+            <section class="about">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h2 class="slide-up">About BnB</h2>
+                            <p class="slide-up">BnB is a website that allows users to discover and book amazing places to stay at.</p>
+                            <p class="slide-up">It is a great place to find a place to stay for your next vacation or business trip.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="about slide-up">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h2>About BnB</h2>
+                            <p>BnB is a website that allows users to discover and book amazing places to stay at.</p>
+                            <p>It is a great place to find a place to stay for your next vacation or business trip.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
         </main>
 
-        <footer class="text-muted text-center">
-            <div class="container">
-                <p>&copy; BnB - {{ current_year }}</p>
-            </div>
-        </footer>
+        
     </div>
+    <footer class="text-muted text-center slide-up">
+        <div class="container">
+            <p>&copy; BnB - {{ current_year }}</p>
+        </div>
+    </footer>
 
-    <!-- Optional: JavaScript libraries -->
+    <!-- JavaScript libraries -->
+    <script src="{{ url_for('static', filename='scripts/base.js') }}"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <!-- Include any additional JavaScript files here -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var slideElements = document.querySelectorAll('.slide-up');
+    
+            function checkSlide() {
+                slideElements.forEach(function(el) {
+                    var slideInAt = (window.scrollY + window.innerHeight) - el.clientHeight / 2;
+                    var isHalfShown = slideInAt > el.offsetTop;
+                    var isNotScrolledPast = window.scrollY < el.offsetTop + el.clientHeight;
+    
+                    if (isHalfShown && isNotScrolledPast) {
+                        el.classList.add('visible');
+                    } else {
+                        el.classList.remove('visible');
+                    }
+                });
+            }
+    
+            window.addEventListener('scroll', checkSlide);
+            checkSlide(); // Run on load in case elements are already in view
+        });
+    </script>
+    
 </body>
 </html>

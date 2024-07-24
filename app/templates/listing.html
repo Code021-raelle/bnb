@@ -14,7 +14,7 @@
             <img src="{{ url_for('static', filename='images/' ~ listing.image_file) }}" class="card-img-top" alt="{{ listing.title }}">
         </div>
         <p>{{ listing.description }}</p>
-        <p>Price: {{ price_with_currency }}</p>
+        <p><strong>Price:</strong> {{ price_with_currency }}</p>
         
         <h2 class="mt-4">Location</h2>
         <div id="map" style="height: 400px;"></div>
@@ -68,7 +68,7 @@
         </div>
     {% else %}
         <h1 class="mb-3">Create a New Listing</h1>
-        <form method="POST" enctype="multipart/form-data">
+        <form method="POST" enctype="multipart/form-data" class="list-form">
             {{ form.hidden_tag() }}
             <div class="form-group">
                 {{ form.title.label(class="form-label") }}
@@ -85,6 +85,14 @@
             <div class="form-group">
                 {{ form.price.label(class="form-label") }}
                 {{ form.price(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.currency.label(class="form-label") }}
+                {{ form.currency(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.location.label(class="form-label") }}
+                {{ form.location(class="form-control") }}
             </div>
             <div class="form-group">
                 {{ form.longitude.label(class="form-label") }}

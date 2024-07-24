@@ -98,3 +98,25 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log("Geolocation is not supported by this browser.");
     }
 });
+
+// Sliding up of words in the homepage
+document.addEventListener('DOMContentLoaded', function() {
+    var slideElements = document.querySelectorAll('.slide-up');
+
+    function checkSlide() {
+        slideElements.forEach(function(el) {
+            var slideInAt = (window.scrollY + window.innerHeight) - el.clientHeight / 2;
+            var isHalfShown = slideInAt > el.offsetTop;
+            var isNotScrolledPast = window.scrollY < el.offsetTop + el.clientHeight;
+
+            if (isHalfShown && isNotScrolledPast) {
+                el.classList.add('visible');
+            } else {
+                el.classList.remove('visible');
+            }
+        });
+    }
+
+    window.addEventListener('scroll', checkSlide);
+    checkSlide(); // Run on load in case elements are already in view
+});

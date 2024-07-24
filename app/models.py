@@ -1,8 +1,10 @@
 from datetime import datetime
+from decimal import Decimal
 from app import db, login_manager, bcrypt
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import relationship
+from .utils import get_currency_symbol
 
 
 @login_manager.user_loader
@@ -36,7 +38,6 @@ class User(db.Model, UserMixin):
     #is_suspended = db.Column(db.Boolean, default=False)
     #is_verified = db.Column(db.Boolean, default=False)
 
-
     def __repr__(self):
         return f'<User {self.username}>'
     
@@ -53,13 +54,18 @@ class Listing(db.Model):
     description = db.Column(db.Text, nullable=False)
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
-    price = db.Column(db.Integer, nullable=False)
+    price = db.Column(db.Numeric, nullable=False)
+    currency = db.Column(db.String(3), default='USD')
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __repr__(self):
         return f"Listing('{self.title}', '{self.date_posted}')"
+
+    def format_price(self):
+        symbol = get_currency_symbol(self.currency)
+        return f"{symbol}{self.price:,.2f}"
 
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -106,3 +112,23 @@ class Chat(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+
+def get_currency_symbol(currency_code):
+    currency_symbols = {
+        'USD': '$',
+        'NGN': '₦',
+        'EUR': '€',
+        'GBP': '£',
+        'JPY': '¥',
+        'AUD': '$',
+        'CAD': '$',
+        'CHF': 'CHF',
+        'CNY': '¥',
+        'HKD': '$',
+        'NZD': '$',
+        'SEK': 'kr',
+        'SGD': '$',
+        'ZAR': 'R'
+    }
+    return currency_symbols.get(currency_code, currency_code)

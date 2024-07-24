@@ -51,6 +51,11 @@
     background-color: #007bff;
     border-color: #007bff;
 }
+.about {
+    background: url(../images/listForm.svg) no-repeat center center;
+    background-size: cover;
+    height: 600px;
+}
 footer {
     background-color: #f8f9fa;
     padding: 1rem 0;
@@ -191,4 +196,19 @@ footer {
 .review-card .fas,
 .review-card .far {
     color: #ffc107;
+}
+
+.list-form {
+    background-image: url(../images/listForm.svg) no-repeat;
+}
+
+.slide-up {
+    opacity: 0;
+    transform: translateY(100px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.slide-up.visible {
+    opacity: 1;
+    transform: translateY(0);
 }

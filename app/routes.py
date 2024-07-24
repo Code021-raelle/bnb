@@ -1,5 +1,6 @@
 from flask import render_template, url_for, flash, redirect, request, jsonify, current_app
 from app import app, db, bcrypt, oauth
+from decimal import Decimal
 from app.forms import RegistrationForm, LoginForm, ListingForm, SearchForm, BookingForm, ReviewForm, MessageForm, EditProfileForm, PreferredCurrencyForm
 from app.models import User, Listing, Review, Message, Booking, Chat
 from flask_login import login_user, current_user, logout_user, login_required
@@ -11,7 +12,28 @@ import secrets
 import logging
 import os
 
+
+def get_currency_symbol(currency_code):
+    currency_symbols = {
+        'USD': '$',
+        'NGN': '₦',
+        'EUR': '€',
+        'GBP': '£',
+        'JPY': '¥',
+        'AUD': '$',
+        'CAD': '$',
+        'CHF': 'CHF',
+        'CNY': '¥',
+        'HKD': '$',
+        'NZD': '$',
+        'SEK': 'kr',
+        'SGD': '$',
+        'ZAR': 'R'
+    }
+    return currency_symbols.get(currency_code, currency_code)
+
 logging.basicConfig(level=logging.DEBUG)
+
 
 @app.route("/")
 @app.route("/home")
@@ -341,10 +363,13 @@ def listing(listing_id):
     user_currency = current_user.preferred_currency if current_user.is_authenticated else 'USD'
     
     if listing.currency != user_currency:
-        converted_price = convert_currency(listing.price, listing.currency, user_currency)
-        price_with_currency = f"{converted_price} {user_currency}"
+        converted_price, currency = convert_currency(float(listing.price), listing.currency, user_currency)
+        currency_symbol = get_currency_symbol(user_currency)
+        price_with_currency = f"{currency_symbol}{converted_price:,.2f}"
     else:
-        price_with_currency = f"{listing.price} {listing.currency}"
+        currency_symbol = get_currency_symbol(listing.currency)
+        converted_price, currency = listing.price, listing.currency
+        price_with_currency = f"{currency_symbol} {listing.price:,.2f}"
 
     form = ReviewForm()
     if form.validate_on_submit():
@@ -382,19 +407,12 @@ def convert_currency(amount, from_currency, to_currency):
             raise KeyError(f"Currency '{to_currency}' not found.")
         
         rate = data['conversion_rates'][to_currency]
-        return amount * rate
+        converted_amount = float(amount) * rate
+        return round(converted_amount, 2), to_currency
     
-    except requests.RequestException as e:
+    except (requests.exceptions.RequestException, ValueError) as e:
         logging.error(f"Request to currency conversion API failed: {e}")
-        raise ValueError("Failed to fetch conversion rates.")
-    
-    except KeyError as e:
-        logging.error(f"Key error: {e}")
-        raise
-
-    except ValueError as e:
-        logging.error(f"Value error: {e}")
-        raise
+        return amount, from_currency
 
 
 @app.route('/set_currency', methods=['GET', 'POST'])
@@ -453,3 +471,19 @@ def checkout(listing_id):
         except stripe.error.StripeError:
             flash('Payment failed. Please try again.', 'danger')
     return render_template('checkout.html', listing=listing, stripe_public_key=app.config['STRIPE_PUBLIC_KEY'])
+
+
+@app.route('/update_listing/<int:listing_id>', methods=['GET', 'POST'])
+def update_listing_price(listing_id):
+    listing = Listing.query.get(listing_id)
+    price = request.form.get('price')
+    currency = request.form.get('currency')
+    latitude = request.form.get('latitude')
+    longitude = request.form.get('longitude')
+    listing.price = Decimal(price.replace(',', ''))  # Remove commas and convert to numeric
+    listing.currency = currency
+    listing.latitude = float(latitude)
+    listing.longitude = float(longitude)
+    db.session.commit()
+    flash('Listing updated successfully', 'success')
+    return redirect(url_for('some_view_function'))  # Redirect to an appropriate view
