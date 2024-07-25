@@ -4,13 +4,20 @@
     <i><h1>{{ user.username }}'s Profile</h1></i>
     {% if current_user.image %}
         <div class="form-group">
-            <img src="{{ url_for('static', filename='uploads/' + current_user.image) }}" alt="Profile Image" class="img-thumbnail">
+            <img src="{{ url_for('static', filename='uploads/' + current_user.image_file) }}" alt="Profile Image" class="img-thumbnail">
         </div>
     {% else %}
         <div class="form-group">
             <b><p>No profile image available</p></b>
         </div>
     {% endif %}
+    <p><b><h5>Full Name:</h5></b><i>
+        {% if user.is_authenticated %} 
+            {{ user.full_name }}
+        {% else %}
+            <p>Null</p>
+        {% endif %}
+    </i></p>
     <p><b><h5>First Name:</h5></b> <i>{{ user.first_name }}</i></p>
     <p><b><h5>Last Name:</h5></b> <i>{{ user.last_name }}</i></p>
     <p><b><h5>Email:</h5></b> <i>{{ user.email }}</i></p>
@@ -24,5 +31,8 @@
     </p>
     {% if user == current_user %}
         <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">Edit Profile</a>
+    {% endif %}
+    {% if user == current_user %}
+        <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
     {% endif %}
 {% endblock %}

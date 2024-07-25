@@ -51,11 +51,12 @@
     background-color: #007bff;
     border-color: #007bff;
 }
-.about {
+.role {
     background: url(../images/listForm.svg) no-repeat center center;
     background-size: cover;
-    height: 600px;
+    
 }
+
 footer {
     background-color: #f8f9fa;
     padding: 1rem 0;

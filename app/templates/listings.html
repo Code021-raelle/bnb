@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Listings{% endblock %}
 {% block content %}
-    <div class="container mt-5">
+    <div class="container mt-5 list-page">
         <h1 class="my-4 text-center">Listings</h1>
             
         <div class="row">
@@ -11,7 +11,7 @@
                         <img src="{{ url_for('static', filename='images/' ~ listing.image_file) }}" class="card-img-top" alt="{{ listing.title }}">
                         <div class="card-body">
                             <h5 class="card-title"><a href="{{ url_for('listing', listing_id=listing.id) }}">{{ listing.title }}</a></h5>
-                            <p class="card-text">{{ listing.price_with_currency }}</p>
+                            <p><strong>Price:</strong> {{ price_with_currency }}</p>
                             <p class="card-text">{{ listing.description | truncate(100) }}</p>
                             <a href="{{ url_for('listing', listing_id=listing.id) }}" class="btn btn-primary">View Details</a>
                             <a href="{{ url_for('book_listing', listing_id=listing.id) }}" class="btn btn-success">Book Now</a>

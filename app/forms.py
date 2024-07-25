@@ -60,7 +60,7 @@ class MessageForm(FlaskForm):
 
 
 class EditProfileForm(FlaskForm):
-    image_file = FileField('Profile Image', validators=[FileRequired(), FileAllowed(['jpg', 'png'], 'Images only!')])
+    image = FileField('Profile Image', validators=[FileRequired(), FileAllowed(['jpg', 'png'], 'Images only!')])
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
     first_name = StringField('First Name', validators=[DataRequired(), Length(min=2, max=20)])
     last_name = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=20)])
@@ -79,5 +79,8 @@ class UpdateUserForm(FlaskForm):
 class PreferredCurrencyForm(FlaskForm):
     currency = SelectField('Preferred Currency', choices=[
         ('USD', 'USD'), ('EUR', 'EUR'), ('GBP', 'GBP'), ('NGN', 'NGN'),
+        ('JPY', 'JPY'), ('AUD', 'AUD'), ('CAD', 'CAD'), ('CHF', 'CHF'),
+        ('CNY', 'CNY'), ('HKD', 'HKD'), ('NZD', 'NZD'), ('SEK', 'SEK'),
+        ('SGD', 'SGD'), ('ZAR', 'ZAR')
     ])
     submit = SubmitField('Save')

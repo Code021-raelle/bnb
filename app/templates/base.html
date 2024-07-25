@@ -13,8 +13,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="preload" href="{{ url_for('static', filename='images/icon.svg') }}" as="image">
     <!-- Maps -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
     <script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
 </head>
@@ -34,14 +32,20 @@
                         <a class="nav-link" href="{{ url_for('search') }}">Search</a>
                     </li>
                     {% if current_user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('profile', username=current_user.username) }}">My Profile</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('new_listing') }}">New Listing</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-user"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="profileDropdown">
+                            <!-- Let's display users first name and last name -->
+                            <a class="dropdown-item" href="{{ url_for('profile', username=current_user.username) }}">{{ current_user.full_name }}</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{{ url_for('profile', username=current_user.username) }}">Profile</a>
+                            <a class="dropdown-item" href="{{ url_for('new_listing') }}">New Listing</a>
+                            <a class="dropdown-item" href="{{ url_for('set_currency' )}}">Set Currency</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a>
+                        </div>
                     </li>
                     {% else %}
                     <li class="nav-item">
@@ -72,12 +76,24 @@
             {% endif %}
         {% endwith %}
     </div>
-    {% if current_user.is_authenticated and not current_user.preferred_currency %}
-        <div class="alert alert-info" role="alert">
-            Please set your preferred currency: 
-            <a href="{{ url_for('set_currency') }}" class="btn btn-primary">Set Currency</a>
+    
+    <!-- Set Currency Modal -->
+<div class="modal fade" id="setCurrencyModal" tabindex="-1" aria-labelledby="setCurrencyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="setCurrencyModalLabel">Set Your Preferred Currency</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Please set your preferred currency to continue.</p>
+                <a href="{{ url_for('set_currency') }}" class="btn btn-primary">Set Currency</a>
+            </div>
         </div>
-    {% endif %}
+    </div>
+</div>
 
     <!-- Bootstrap JS and dependencies -->
     <script src="{{ url_for('static', filename='scripts/base.js') }}"></script>

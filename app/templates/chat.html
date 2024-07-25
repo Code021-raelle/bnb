@@ -10,7 +10,7 @@
             {% for message in messages %}
                 <div class="chat-message {% if message.sender == current_user %}sent{% else %}received{% endif %}">
                     <div class="chat-message-content">
-                        <img src="{{ url_for('static', filename='images/profile_placeholder.png') }}" alt="profile picture" class="chat-message-avatar">
+                        <img src="{{ url_for('static', filename='images/current_user.image_file') }}" alt="profile picture" class="chat-message-avatar">
                         <div class="chat-message-bubble">
                             <p>{{ message.body }}</p>
                             <span class="chat-message-timestamp">{{ message.timestamp.strftime('%H:%M') }}</span>

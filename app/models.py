@@ -3,6 +3,7 @@ from decimal import Decimal
 from app import db, login_manager, bcrypt
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import event
 from sqlalchemy.orm import relationship
 from .utils import get_currency_symbol
 
@@ -17,6 +18,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(20), unique=True, nullable=False)
     first_name = db.Column(db.String(20), nullable=True)
     last_name = db.Column(db.String(20), nullable=True)
+    full_name = db.Column(db.String(100), nullable=True)
     about_me = db.Column(db.Text, nullable=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     image_file = db.Column(db.String(225), nullable=False, default='default.jpg')
@@ -47,6 +49,12 @@ class User(db.Model, UserMixin):
     def check_password(self, password):
         return bcrypt.check_password_hash(self.password, password)
 
+
+# Event listener to automatically set the full_name before saving the user
+@event.listens_for(User, 'before_insert')
+@event.listens_for(User, 'before_update')
+def receive_before_insert(mapper, connection, target):
+    target.full_name = f'{target.first_name} {target.last_name or ""}'
 
 class Listing(db.Model):
     id = db.Column(db.Integer, primary_key=True)

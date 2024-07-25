@@ -1,5 +1,5 @@
 from flask import render_template, url_for, flash, redirect, request, jsonify, current_app
-from app import app, db, bcrypt, oauth
+from app import app, db, bcrypt, oauth, socketio
 from decimal import Decimal
 from app.forms import RegistrationForm, LoginForm, ListingForm, SearchForm, BookingForm, ReviewForm, MessageForm, EditProfileForm, PreferredCurrencyForm
 from app.models import User, Listing, Review, Message, Booking, Chat
@@ -242,6 +242,10 @@ def user_listings(username):
     return render_template('user_listings.html', listings=listings, bookings=bookings, user=user)
 
 
+@socketio.on('message')
+def handle_message(data):
+    print('Received message:', data)
+
 @app.route("/send_message", methods=['GET', 'POST'])
 @login_required
 def send_message():
@@ -331,10 +335,10 @@ def edit_profile():
         current_user.email = form.email.data
         current_user.about_me = form.about_me.data
 
-        if form.image_file.data:
-            filename = secure_filename(form.image_file.data.filename)
-            form.image_file.data.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            current_user.image_file = filename
+        if form.image.data:
+            filename = secure_filename(form.image.data.filename)
+            form.image.data.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            current_user.image = filename
         
         db.session.commit()
         flash('Your profile has been updated!', 'success')
@@ -352,9 +356,22 @@ def edit_profile():
 
 @app.route("/listings")
 def listings():
+    user = current_user
+    listing = Listing.query.get_or_404(listing_id)
+    user_currency = current_user.preferred_currency if current_user.is_authenticated else 'USD'
+    
+    if listing.currency != user_currency:
+        converted_price, currency = convert_currency(float(listing.price), listing.currency, user_currency)
+        currency_symbol = get_currency_symbol(user_currency)
+        price_with_currency = f"{currency_symbol}{converted_price:,.2f}"
+    else:
+        currency_symbol = get_currency_symbol(listing.currency)
+        converted_price, currency = listing.price, listing.currency
+        price_with_currency = f"{currency_symbol} {listing.price:,.2f}"
+
     page = request.args.get('page', 1, type=int)
     listings = Listing.query.paginate(page=page, per_page=10)
-    return render_template('listings.html', listings=listings)
+    return render_template('listings.html', listings=listings, listing=listing, user=user, price=converted_price, currency=user_currency, price_with_currency=price_with_currency)
 
 @app.route("/listing/<int:listing_id>", methods=['GET', 'POST'])
 def listing(listing_id):
@@ -487,3 +504,11 @@ def update_listing_price(listing_id):
     db.session.commit()
     flash('Listing updated successfully', 'success')
     return redirect(url_for('some_view_function'))  # Redirect to an appropriate view
+
+
+#@app.before_request
+@login_required
+def check_preferred_currency():
+    if current_user.is_authenticated and not current_user.preferred_currency:
+        if request.endpoint != 'set_currency':
+            return redirect(url_for('set_currency'))

@@ -1,29 +1,33 @@
 {% extends "base.html" %}
 {% block title %}Search{% endblock %}
 {% block content %}
-    <h1>Search Listings</h1>
-    <form method="POST" action="{{ url_for('search') }}">
-        {{ form.hidden_tag() }}
-        <p>
-            {{ form.search.label }}<br>
-            {{ form.search(size=32) }}
-        </p>
-        <p>
-            {{ form.min_price.label }}<br>
-            {{ form.min_price }}
-        </p>
-        <p>
-            {{ form.max_price.label }}<br>
-            {{ form.max_price }}
-        </p>
-        <p>
-            {{ form.location.label }}<br>
-            {{ form.location(size=32) }}
-        </p>
-        <p>
-            {{ form.amenities.label }}<br>
-            {{ form.amenities(size=32) }} (comma separated)
-        </p>
-        <p>{{ form.submit() }}</p>
-    </form>
+    <div class="container mt-5">
+        <h1 class="mb-4">Search Listings</h1>
+        <form method="POST" action="{{ url_for('search') }}">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.search.label(class="form-label") }}
+                {{ form.search(class="form-control", size=32) }}
+            </div>
+            <div class="form-group">
+                {{ form.min_price.label(class="form-label") }}
+                {{ form.min_price(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.max_price.label(class="form-label") }}
+                {{ form.max_price(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.location.label(class="form-label") }}
+                {{ form.location(class="form-control", size=32) }}
+            </div>
+            <div class="form-group">
+                {{ form.amenities.label(class="form-label") }}
+                {{ form.amenities(class="form-control", size=32) }} <small>(comma separated)</small>
+            </div>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
 {% endblock %}
