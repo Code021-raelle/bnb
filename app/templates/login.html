@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Login</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/sign.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='images/icon.svg') }}">
 </head>
@@ -38,16 +38,21 @@
                                 {{ form.email.label(class="form-control-label") }}
                                 {{ form.email(class="form-control") }}
                             </div>
-                            <div class="form-group">
+                            <div class="form-group position-relative">
                                 {{ form.password.label(class="form-control-label") }}
                                 {{ form.password(class="form-control") }}
+                                <span class="position-absolute" style="top: 75%; right: 10px; transform: translateY(-50%); cursor: pointer; color: black;">
+                                    <i class="fas fa-eye" id="togglePassword"></i>
+                                </span>
                             </div>
-                            <div class="">
-                                {{ form.remember }}
-                                {{ form.remember.label(class="form-check-label") }}
-                            </div>
-                            <div class="form-group">
-                                <a href="{{ url_for('reset_password') }}">Forgot Password?</a>
+                            <div class="form-group d-flex justify-content-between align-items-center">
+                                <div class="">
+                                    {{ form.remember }}
+                                    {{ form.remember.label(class="form-check-label") }}
+                                </div>
+                                <div class="">
+                                    <a href="{{ url_for('reset_password') }}">Forgot Password?</a>
+                                </div>
                             </div>
                             <button type="submit" class="btn btn-primary btn-block">Login</button>
                             <hr>
@@ -64,7 +69,19 @@
         </div>
     </div>
 
+    <script>
+        document.getElementById('togglePassword').addEventListener('click', function (e) {
+            const passwordInput = document.getElementById('{{ form.password.id }}');
+            const icon = e.target;
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        });
+    </script>
+
     <!-- Optional: JavaScript libraries -->
+    <script src="{{ url_for('static', filename='scripts/sign.js') }}"></script>
     <script src="{{ url_for('static', filename='scripts/base.js') }}"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>

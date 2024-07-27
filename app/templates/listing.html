@@ -67,7 +67,7 @@
             {% endif %}
         </div>
     {% else %}
-        <h1 class="mb-3">Create a New Listing</h1>
+        <h1 class="mb-3"><b>Create a New Listing</b></h1>
         <form method="POST" enctype="multipart/form-data" class="list-form">
             {{ form.hidden_tag() }}
             <div class="form-group">
@@ -104,7 +104,7 @@
             </div>
             <div id="map" style="height: 400px;"></div>
             <!-- Add other form fields here -->
-            {{ form.submit(class="btn btn-primary") }}
+            {{ form.submit(class="btn btn-primary mt-4") }}
         </form>
     {% endif %}
 </div>
