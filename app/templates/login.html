@@ -7,7 +7,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Login</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/sign.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='images/icon.svg') }}">
 </head>
 <body>
@@ -29,7 +30,7 @@
         <div class="row justify-content-center mt-5">
             <div class="col-md-6">
                 <div class="card">
-                    <div class="card-header">Login</div>
+                    <div class="card-header text-center"><h1>Login</h1></div>
                     <div class="card-body">
                         <form method="POST" action="">
                             {{ form.hidden_tag() }}
@@ -41,12 +42,21 @@
                                 {{ form.password.label(class="form-control-label") }}
                                 {{ form.password(class="form-control") }}
                             </div>
-                            <button type="submit" class="btn btn-primary">Login</button>
+                            <div class="">
+                                {{ form.remember }}
+                                {{ form.remember.label(class="form-check-label") }}
+                            </div>
+                            <div class="form-group">
+                                <a href="{{ url_for('reset_password') }}">Forgot Password?</a>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Login</button>
                             <hr>
-                            <a class="btn btn-primary" href="{{ url_for('google.login') }}">Login with Google</a><hr>
-                            <a class="btn btn-primary" href="{{ url_for('facebook.login') }}">Login with Facebook</a><hr>
-                            <a class="btn btn-primary" href="{{ url_for('apple_login') }}">Login with Apple</a>
-
+                            <a class="btn btn-primary btn-block" href="{{ url_for('google.login') }}">Login with Google</a>
+                            <a class="btn btn-primary btn-block" href="{{ url_for('facebook.login') }}">Login with Facebook</a>
+                            <a class="btn btn-primary btn-block" href="{{ url_for('apple_login') }}">Login with Apple</a>
+                            <div>
+                                <p class="text-center mt-3"> Don't have an account? <a href="{{ url_for('register') }}">Register</a></p>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -55,6 +65,7 @@
     </div>
 
     <!-- Optional: JavaScript libraries -->
+    <script src="{{ url_for('static', filename='scripts/base.js') }}"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

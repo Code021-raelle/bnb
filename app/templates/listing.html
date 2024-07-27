@@ -14,7 +14,7 @@
             <img src="{{ url_for('static', filename='images/' ~ listing.image_file) }}" class="card-img-top" alt="{{ listing.title }}">
         </div>
         <p>{{ listing.description }}</p>
-        <p><strong>Price:</strong> {{ price_with_currency }}</p>
+        <p><strong>Price:</strong>{{ price_with_currency }}</p>
         
         <h2 class="mt-4">Location</h2>
         <div id="map" style="height: 400px;"></div>

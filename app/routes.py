@@ -1,11 +1,12 @@
 from flask import render_template, url_for, flash, redirect, request, jsonify, current_app
 from app import app, db, bcrypt, oauth, socketio
 from decimal import Decimal
-from app.forms import RegistrationForm, LoginForm, ListingForm, SearchForm, BookingForm, ReviewForm, MessageForm, EditProfileForm, PreferredCurrencyForm
+from app.forms import RegistrationForm, LoginForm, ListingForm, SearchForm, BookingForm, ReviewForm, MessageForm, EditProfileForm, PreferredCurrencyForm, ResetPasswordForm, RequestResetForm
 from app.models import User, Listing, Review, Message, Booking, Chat
 from flask_login import login_user, current_user, logout_user, login_required
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
+from app.utils import send_reset_email
 from PIL import Image
 import requests
 import secrets
@@ -356,22 +357,9 @@ def edit_profile():
 
 @app.route("/listings")
 def listings():
-    user = current_user
-    listing = Listing.query.get_or_404(listing_id)
-    user_currency = current_user.preferred_currency if current_user.is_authenticated else 'USD'
-    
-    if listing.currency != user_currency:
-        converted_price, currency = convert_currency(float(listing.price), listing.currency, user_currency)
-        currency_symbol = get_currency_symbol(user_currency)
-        price_with_currency = f"{currency_symbol}{converted_price:,.2f}"
-    else:
-        currency_symbol = get_currency_symbol(listing.currency)
-        converted_price, currency = listing.price, listing.currency
-        price_with_currency = f"{currency_symbol} {listing.price:,.2f}"
-
     page = request.args.get('page', 1, type=int)
     listings = Listing.query.paginate(page=page, per_page=10)
-    return render_template('listings.html', listings=listings, listing=listing, user=user, price=converted_price, currency=user_currency, price_with_currency=price_with_currency)
+    return render_template('listings.html', listings=listings)
 
 @app.route("/listing/<int:listing_id>", methods=['GET', 'POST'])
 def listing(listing_id):
@@ -504,6 +492,37 @@ def update_listing_price(listing_id):
     db.session.commit()
     flash('Listing updated successfully', 'success')
     return redirect(url_for('some_view_function'))  # Redirect to an appropriate view
+
+
+@app.route("/reset_password", methods=['GET', 'POST'])
+def reset_password():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    form = RequestResetForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        send_reset_email(user)
+        flash('An email has been sent with instructions to reset your password.', 'info')
+        return redirect(url_for('login'))
+    return render_template('reset_password.html', title='Reset Password', form=form)
+
+
+@app.route("/reset_password/<token>", methods=['GET', 'POST'])
+def reset_token(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    user = User.verify_reset_token(token)
+    if user is None:
+        flash('That is an invalid or expired token', 'warning')
+        return redirect(url_for('reset_password'))
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        user.password = hashed_password
+        db.session.commit()
+        flash('Your password has been updated! You are now able to login', 'success')
+        return redirect(url_for('login'))
+    return render_template('reset_token.html', title='Reset Password', form=form)
 
 
 #@app.before_request

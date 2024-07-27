@@ -1,0 +1,37 @@
+body {
+    font-family: 'Georgia';
+    box-sizing: border-box;
+    width: 100%;
+    background: url(../images/signin.svg) no-repeat center center;
+    background-size: cover;
+    background-attachment: fixed;
+    color: #fff;
+}
+.container .card{
+    backdrop-filter: blur(40px);
+    border-radius: 50px;
+    background-color: transparent;
+    border-color: #fff;
+    border-width: 3px;
+    border-style: solid;
+    box-shadow: rgb(200, 400, 500);
+}
+.card-body {
+    backdrop-filter: blur(40px);
+}
+/*.form-group {
+    color: cyan;
+}*/
+hr {
+    background-color: #fff;
+}
+.form-group input[type="text"],
+.form-group input[type="password"] {
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid #fff;
+    color: #fff;
+    font-size: 1rem;
+    padding: 0.5rem 0;
+    width: 100%;
+}

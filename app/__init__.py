@@ -13,7 +13,7 @@ import stripe
 import os
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your_secret_key'
+app.config['SECRET_KEY'] = 'akinshola'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://code021:gabriel@localhost/bnb_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads/'

@@ -1,8 +1,9 @@
 from datetime import datetime
 from decimal import Decimal
-from app import db, login_manager, bcrypt
+from app import db, login_manager, bcrypt, app
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from itsdangerous import Serializer
 from sqlalchemy import event
 from sqlalchemy.orm import relationship
 from .utils import get_currency_symbol
@@ -48,6 +49,19 @@ class User(db.Model, UserMixin):
 
     def check_password(self, password):
         return bcrypt.check_password_hash(self.password, password)
+    
+    def get_reset_token(self, expires_sec=1800):
+        s = Serializer(app.config['SECRET_KEY'], expires_sec)
+        return s.dumps({'user_id': self.id}).decode('utf-8')
+    
+    @staticmethod
+    def verify_reset_token(token):
+        s = Serializer(app.config['SECRET_keY'])
+        try:
+            user_id = s.loads(token)['user_id']
+        except:
+            return None
+        return User.query.get(user_id)
 
 
 # Event listener to automatically set the full_name before saving the user

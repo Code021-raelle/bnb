@@ -10,7 +10,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='images/icon.svg') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link rel="preload" href="{{ url_for('static', filename='images/icon.svg') }}" as="image">
+    <link rel="preload" href="{{ url_for('static', filename='images/preload.svg') }}" as="image">
 </head>
 <body>
     <div class="container-fluid p-0">
@@ -60,10 +60,10 @@
         <main role="main" class="role">
             <!-- Main content of the home page -->
             <section class="jumbotron text-center mb-0 slide-up">
-                <div class="container">
-                    <h1 class="jumbotron-heading slide-up">Welcome to BnB!</h1>
-                    <p class="lead slide-up">Discover and book amazing places to stay at.</p>
-                    <p class="slide-up">
+                <div class="container" style="padding: 9rem;">
+                    <h1 class="jumbotron-heading slide-up text-center">Welcome to BnB!</h1>
+                    <p class="lead slide-up text-center">Discover and book amazing places to stay at.</p>
+                    <p class="slide-up text-center">
                         <a href="/listings" class="btn btn-primary my-2">View Listings</a>
                         <!-- Add more buttons or links here -->
                     </p>
