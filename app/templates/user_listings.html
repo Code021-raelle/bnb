@@ -1,20 +1,28 @@
 {% extends "base.html" %}
 {% block title %}{{ user.username }}'s Listings{% endblock %}
 {% block content %}
-    <h1>Listings by {{ user.username }}</h1>
+    <style>
+        body {
+            background: url(../static/images/listings.svg) no-repeat center center;
+            background-size: cover;
+            background-attachment: fixed;
+            color: #f5f5f5;
+        }
+    </style>
+    <h1 class="text-center"><b><i>Listings by {{ user.username }}</i></b></h1>
     {% for listing in listings %}
         <div>
-            <h2>{{ listing.title }}</h2>
+            <h2><i>{{ listing.title }}</i></h2>
             <p>{{ listing.description }}</p>
         </div>
     {% else %}
         <p>No listings found</p>
     {% endfor %}
 
-    <h1>Bookings by {{ user.username }}</h1>
+    <h1 class="text-center"><b><i>Bookings by {{ user.username }}</i></b></h1>
     {% for booking in bookings %}
         <div>
-            <h2>{{ booking.listing.title }}</h2>
+            <h2><i>{{ booking.listing.title }}</i></h2>
             <p>From {{ booking.start_date }} to {{ booking.end_date }}</p>
         </div>
     {% else %}

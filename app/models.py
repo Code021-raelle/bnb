@@ -124,6 +124,9 @@ class Message(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    file_path = db.Column(db.String(200), nullable=True)
+
+    
 
     def __repr__(self):
         return f'<Message {self.body}>'

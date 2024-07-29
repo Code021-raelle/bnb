@@ -1,8 +1,15 @@
 {% extends "base.html" %}
 {% block title %}Chats{% endblock %}
 {% block content %}
+    <style>
+        body {
+            background: url(../static/images/inbox.svg) no-repeat center center;
+            background-size: cover;
+            background-attachment: fixed;
+        }
+    </style>
     <div class="chat-container">
-        <div class="chat-header">      
+        <div class="chat-header">
             <i><h1>{{ user.username }}</h1></i>
         </div>
         <div class="chat-messages">
@@ -27,6 +34,9 @@
                 <div class="input-group">
                     <input type="text" class="form-control" id="message" name="message" placeholder="Type a message" required>
                     <div class="input-group-append">
+                        <!--input type="file" class="form-control-file" id="file" name="file" accept="image/*,application/pdf,application/msword"-->
+                        <button type="button" class="btn btn-secondary" id="recordVoice"><i class="fas fa-microphone"></i></button>
+                        <button type="button" class="btn btn-info" id="videoCall"><i class="fas fa-video"></i></button>
                         <button type="submit" class="btn btn-primary">Send</button>
                     </div>
                 </div>
@@ -61,18 +71,14 @@
 
 {% block scripts %}
     {{ super() }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
     <script>
-        
-
         document.addEventListener('DOMContentLoaded', function () {
-            // Initialize WebSocket connection
-            const ws = new WebSocket('ws://localhost:5000/ws');  // Replaced with my WebSocket server URL
+            const ws = new WebSocket('ws://localhost:5000/ws');  // Replace with your WebSocket server URL
 
-            // Handle incoming messages from WebSocket server
             ws.onmessage = function(event) {
                 const data = JSON.parse(event.data);
                 if (data.type === 'message') {
-                    // Update chat UI with the new message
                     const message = data.message;
                     const chatMessages = document.querySelector('.chat-messages');
                     const newMessageElement = document.createElement('div');
@@ -81,7 +87,7 @@
                         <div class="chat-message-content">
                             <img src="{{ url_for('static', filename='images/profile_placeholder.png') }}" alt="profile picture" class="chat-message-avatar">
                             <div class="chat-message-bubble">
-                                <p>${message.body}</p>
+                                ${message.file_path ? `<audio controls><source src="{{ url_for('static', filename=message.file_path) }}" type="audio/wav"></audio>` : `<p>${message.body}</p>`}
                                 <span class="chat-message-timestamp">${message.timestamp}</span>
                             </div>
                         </div>
@@ -90,36 +96,63 @@
                 }
             };
 
-            // Handle form submission
             const messageForm = document.getElementById('messageForm');
             messageForm.addEventListener('submit', function(event) {
                 event.preventDefault();
                 const formData = new FormData(messageForm);
                 const message = formData.get('message');
                 const recipient = formData.get('recipient');
-        
-                // Send message via WebSocket
+                const file = formData.get('file');
+
+                // Handle file upload and message sending
                 ws.send(JSON.stringify({
                     type: 'message',
-                    sender: '{{ current_user.username }}',  // Replace with actual username
+                    sender: '{{ current_user.username }}',
                     recipient: recipient,
                     body: message,
-                    timestamp: new Date().toISOString()
+                    file: file ? file.name : null
                 }));
-
-                // Clear input field after sending message
+                
                 messageForm.reset();
             });
 
-            // Handle reply modal display
-            const replyButtons = document.querySelectorAll('.reply-btn');
-            replyButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    const sender = this.getAttribute('data-sender');
-                    document.getElementById('replyTo').innerText = sender;
-                    document.getElementById('modal-recipient').value = sender;
-                    $('#replyModal').modal('show');
+            // Recording Voice Message
+            let mediaRecorder;
+            const recordVoiceButton = document.getElementById('recordVoice');
+            const fileInput = document.getElementById('file');
+            recordVoiceButton.addEventListener('click', async () => {
+                if (mediaRecorder && mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                    return;
+                }
+
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.start();
+
+                const audioChunks = [];
+                mediaRecorder.addEventListener('dataavailable', event => {
+                    audioChunks.push(event.data);
                 });
+
+                mediaRecorder.addEventListener('stop', () => {
+                    const audioBlob = new Blob(audioChunks);
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const audio = new Audio(audioUrl);
+                    audio.play();
+
+                    // Create a File object from the Blob
+                    const file = new File([audioBlob], 'voice-message.wav', { type: 'audio/wav' });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    fileInput.files = dataTransfer.files;
+                });
+            });
+
+            // Video Call Button
+            const videoCallButton = document.getElementById('videoCall');
+            videoCallButton.addEventListener('click', () => {
+                window.open('https://your-video-call-service.com', '_blank');  // Replace with your video call service URL
             });
         });
     </script>

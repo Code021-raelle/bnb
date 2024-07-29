@@ -268,10 +268,19 @@ def send_message():
 def reply_message():
     user = current_user
     recipient_username = request.form.get('recipient')
-    message_body = request.form.get('message')
+    message_body = request.form.get('message', '')
     recipient = User.query.filter_by(username=recipient_username).first()
+    file = request.files.get('file')
+
     if recipient:
-        message = Message(body=message_body, sender=current_user, recipient=recipient)
+        if file:
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            message = Message(body=message_body, sender=current_user, recipient=recipient, file_path=file_path)
+        else:
+            message = Message(body=message_body, sender=current_user, recipient=recipient)
+            
         db.session.add(message)
         db.session.commit()
         flash('Your reply has been sent!', 'success')

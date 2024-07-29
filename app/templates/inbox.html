@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 {% block title %}Inbox{% endblock %}
 {% block content %}
+    <style>
+        body {
+            background: url(../static/images/inbox.svg) no-repeat center center;
+            background-size: cover;
+            background-attachment: fixed;
+        }
+    </style>
     <h1>Inbox</h1>
     <div class="list-group">
         {% for message in messages %}
