@@ -9,7 +9,7 @@
             color: #f5f5f5;
         }
     </style>
-    <i><h1>{{ user.username }}'s Profile</h1></i>
+    <i><h1 class="text-center">{{ user.username }}'s Profile</h1></i>
     {% if current_user.image %}
         <div class="form-group">
             <img src="{{ url_for('static', filename='uploads/' + current_user.image_file) }}" alt="Profile Image" class="img-thumbnail">
