@@ -13,7 +13,7 @@
         <div class="col-md-4 d-flex align-items-stretch">
             <img src="{{ url_for('static', filename='images/' ~ listing.image_file) }}" class="card-img-top" alt="{{ listing.title }}">
         </div>
-        <p>{{ listing.description }}</p>
+        <p class="mt-3">{{ listing.description }}</p>
         <p><strong>Price:</strong> {{ price_with_currency }}</p>
         
         <h2 class="mt-4">Location</h2>
