@@ -107,3 +107,11 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('scroll', checkSlide);
     checkSlide(); // Run on load in case elements are already in view
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Simulate loading completion (e.g., after AJAX call or page content fully loaded)
+    setTimeout(function() {
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('main-content').classList.remove('hidden');
+    }, 500); // Replace 3000 with the actual loading time if necessary
+});

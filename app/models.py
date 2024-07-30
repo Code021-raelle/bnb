@@ -134,6 +134,7 @@ class Message(db.Model):
 
 class Chat(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
