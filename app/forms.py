@@ -27,6 +27,8 @@ class ListingForm(FlaskForm):
     description = TextAreaField('Description', validators=[DataRequired()])
     price = StringField('Price', validators=[DataRequired(), Length(min=1, max=20)])
     currency = SelectField('Currency', choices=[('USD', 'USD'), ('EUR', 'EUR'), ('GBP', 'GBP'), ('NGN', 'NGN')])
+    state = TextAreaField('State', validators=[DataRequired()])
+    city = TextAreaField('City', validators=[DataRequired()])
     location = TextAreaField('Address', validators=[DataRequired()])
     latitude = FloatField('Latitude', validators=[DataRequired()])
     longitude = FloatField('Longitude', validators=[DataRequired()])

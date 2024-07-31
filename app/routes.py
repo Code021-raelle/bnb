@@ -191,29 +191,30 @@ def new_listing():
 
 @app.route("/search", methods=['GET', 'POST'])
 def search():
-    form = SearchForm()
-    if form.validate_on_submit():
-        search_term = form.search.data
-        min_price = form.min_price.data
-        max_price = form.max_price.data
-        location = form.location.data
-        amenities = form.amenities.data.split(',') if form.amenities.data else []
+    search_term = request.args.get('q', '')  # Default to an empty string if no query is provided
+    min_price = request.args.get('min_price')
+    max_price = request.args.get('max_price')
+    location = request.args.get('location')
+    state = request.args.get('state')
+    amenities = request.args.get('amenities', '').split(',') if request.args.get('amenities') else []
 
-        query = Listing.query.filter(Listing.title.contains(search_term) | Listing.description.contains(search_term))
+    query = Listing.query.filter(Listing.title.contains(search_term) | Listing.description.contains(search_term))
 
-        if min_price:
-            query = query.filter(Listing.price >= min_price)
-        if max_price:
-            query = query.filter(Listing.price <= max_price)
-        if location:
-            query = query.filter(Listing.location.contains(location))
-        if amenities:
-            for amenity in amenities:
-                query = query.filter(Listing.amenities.contains(amenity.strip()))
+    if min_price:
+        query = query.filter(Listing.price >= float(min_price))
+    if max_price:
+        query = query.filter(Listing.price <= float(max_price))
+    if location:
+        query = query.filter(Listing.location.contains(location))
+    if state:
+        query = query.filter(Listing.state.contains(state))
+    if amenities:
+        for amenity in amenities:
+            query = query.filter(Listing.amenities.contains(amenity.strip()))
 
-        listings = query.all()
-        return render_template('search_results.html', listings=listings, search_term=search_term, form=form)
-    return render_template('search.html', title='Search', form=form)
+    listings = query.all()
+    return render_template('search_results.html', listings=listings, search_term=search_term)
+
 
 
 @app.route("/listing/<int:listing_id>/book", methods=['GET', 'POST'])
@@ -540,3 +541,18 @@ def check_preferred_currency():
     if current_user.is_authenticated and not current_user.preferred_currency:
         if request.endpoint != 'set_currency':
             return redirect(url_for('set_currency'))
+
+
+@app.route('/get_states', methods=['GET'])
+def get_states():
+    country_code = request.args.get('country_code')
+    if not country_code:
+        return jsonify({'error': 'Country code is required'}), 400
+    
+    response = requests.get(f'https://restcountries.com/v3.1/alpha/{country_code}')
+    if response.status_code == 200:
+        country_data = response.json()
+        states = country_data.get('subregions', [])
+        return render_template('states.html', states=states)
+    else:
+        return "Error retrieving data", response.status_code

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% title %} States {% title %}
+{% block content %}
+    <h1>States</h1>
+    <ul>
+        {% for state in states %}
+            <li>{{ state.name }} ({{ state.abbreviation }})</li>
+        {% endfor %}
+    </ul>
+    <script>
+        async function getStates(countryCode) {
+            try {
+                const response = await fetch(`https://restcountries.com/v3.1/alpha/${countryCode}`);
+                if (response.ok) {
+                    const countryData = await response.json();
+                    const states = countryData[0].subregions || [];
+                    const statesList = document.getElementById('states-list');
+                    states.forEach(state => {
+                        const li = document.createElement('li');
+                        li.textContent = state;
+                        statesList.appendChild(li);
+                    });
+                } else {
+                    console.error('Error fetching data:', response.status);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Example usage: Get states for the United States (country code "US")
+        getStates('US');
+    </script>
+{% endblock %}

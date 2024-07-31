@@ -13,11 +13,11 @@ body {
     z-index: 1050; /* Ensure it appears above other content */
 }
 
-.form-group {
+/*.form-group {
     justify-content: center;
     align-items: center;
     text-align: center;
-}
+}*/
 
 /* Example custom styling for alerts if needed 
 #flash-messages .alert {
@@ -33,6 +33,21 @@ body {
 .navbar-nav .nav-link {
     font-size: 1.1rem;
 }
+.navbar-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 50%;
+}
+.form-inline {
+    display: flex;
+    align-items: center;
+    border-radius: 50%;
+}
+.navbar-nav {
+    flex-direction: row;
+}
+
 .jumbotron {
     height: 600px;
     background: url('../images/home.jpg') no-repeat center center;
