@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>List Your Property</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/list-prop.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sign.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="preload" href="{{ url_for('static', filename='images/preload.svg') }}" as="image">
+    <link rel="icon" href="{{ url_for('static', filename='images/icon.svg') }}">
+</head>
+<body>
+    <style>
+        body {
+            background: url(../static/images/maryland.jpg) no-repeat center;
+            background-size: cover;
+        }
+    </style>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="{{ url_for('home') }}">
+                <img src="{{ url_for('static', filename='images/icon.svg') }}" width="30" height="30" class="d-inline-block align-top" alt="">
+                Bed & Breakfast
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('home') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('set_currency') }}">USD</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('listings') }}">Listings</a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('inbox') }}">
+                            <i class="fas fa-inbox"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-user"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="profileDropdown">
+                            <!-- Let's display users first name and last name -->
+                            <a class="dropdown-item" href="{{ url_for('profile', username=current_user.username) }}">{{ current_user.full_name }}</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{{ url_for('profile', username=current_user.username) }}">Profile</a>
+                            <a class="dropdown-item" href="{{ url_for('new_listing') }}">List your property</a>
+                            <a class="dropdown-item" href="{{ url_for('set_currency' )}}">Set Currency</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Sign in</a>
+                    </li>
+                    
+                    {% endif %}
+                </ul>
+            </div>
+        </nav>
+    </header>
+    
+    <div class="container-fluid bg-primary text-white text-center py-5">
+        <h1>Property Listing</h1>
+    </div>
+
+    <div class="jumbotron jumbotron-fluid text-center" style="background-image: url('/static/images/property-listing-bg.jpg'); background-size: cover; color: white;">
+        <div class="container">
+            <h1 class="display-4">Reach Millions of Potential Buyers and Renters</h1>
+            <p class="lead">It's easy and fast to list your property with us. Start now!</p>
+            <a href="{{ url_for('new_listing') }}" class="btn btn-warning btn-lg">List Your Property</a>
+        </div>
+    </div>
+
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h2 class="card-title">Step 1: Sign Up</h2>
+                        <p class="card-text">Create an account or log in to get started.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h2 class="card-title">Step 2: Add Property Details</h2>
+                        <p class="card-text">Enter the details of your property including location, price, and features.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h2 class="card-title">Step 3: Publish</h2>
+                        <p class="card-text">Review your listing and publish it to be visible to potential renters or buyers.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2024 BnB. All rights reserved.</p>
+    </div>
+
+    <!-- Loading screen -->
+    <div id="loading-screen" class="loading-screen">
+        <img src="{{ url_for('static', filename='images/preload.svg') }}" alt="Loading...">
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="{{ url_for('static', filename='scripts/list-prop.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

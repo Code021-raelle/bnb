@@ -31,14 +31,11 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('home') }}">Home</a>
                     </li>
-                    <!--li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('search') }}">Search</a>
-                    </li-->
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('set_currency') }}">USD</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('new_listing') }}">List your property</a>
+                        <a class="nav-link" href="{{ url_for('list_property') }}">List your property</a>
                     </li>
                     {% if current_user.is_authenticated %}
                     <li class="nav-item">

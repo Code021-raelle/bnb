@@ -162,6 +162,11 @@ def save_picture(form_picture):
     return picture_fn
 
 
+@app.route('/list-your-property')
+def list_property():
+    return render_template('list_property.html')
+
+
 @app.route("/listing/new", methods=['GET', 'POST'])
 @login_required
 def new_listing():
