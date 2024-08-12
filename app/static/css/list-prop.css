@@ -3,6 +3,7 @@ body {
     margin: 0;
     padding: 0;
     background-color: #f8f8f8;
+    height: 100%;
 }
 .header {
     background-color: #4CAF50;
@@ -88,4 +89,26 @@ body {
     justify-content: center;
     align-items: center;
     z-index: 9999;
+}
+
+ /* Ensure that the video covers the entire viewport */
+ .video-background {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    min-width: 100%; 
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: -1;
+    overflow: hidden;
+}
+
+/* Optional styling for content over the video */
+.container {
+    position: relative;
+    z-index: 1;
+    color: white;
+    text-align: center;
+    padding: 50px;
 }

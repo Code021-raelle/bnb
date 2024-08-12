@@ -17,7 +17,7 @@
 <body>
     <style>
         body {
-            background: url(../static/images/maryland.jpg) no-repeat center;
+            background: url(../static/images/vid/Luxuriously\ finished\ Shortlet\ in\ Lekki\,\ Lagos\ 🇳🇬.mp4) no-repeat center;
             background-size: cover;
         }
     </style>
@@ -72,9 +72,15 @@
             </div>
         </nav>
     </header>
+
+    <!-- Video element -->
+    <video autoplay muted loop class="video-background">
+        <source src="{{ url_for('static', filename='images/vid/BnB_shortlet.mp4') }}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
     
     <div class="container-fluid bg-primary text-white text-center py-5">
-        <h1>Property Listing</h1>
+        <h1>Welcome to Our Property Listing</h1>
     </div>
 
     <div class="jumbotron jumbotron-fluid text-center" style="background-image: url('/static/images/property-listing-bg.jpg'); background-size: cover; color: white;">
