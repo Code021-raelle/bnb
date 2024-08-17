@@ -6,12 +6,23 @@
             background: url(../static/images/inbox.svg) no-repeat center center;
             background-size: cover;
             background-attachment: fixed;
+            color: #fff;
         }
+        .card-inbox{
+            backdrop-filter: blur(40px);
+            border-radius: 50px;
+            background-color: transparent;
+            border-color: #fff;
+            border-width: 3px;
+            border-style: solid;
+            box-shadow: rgb(200, 400, 500);
+        }
+        
     </style>
-    <h1>Inbox</h1>
-    <div class="list-group">
+    <h1>BnB's Inbox</h1>
+    <div class="card-inbox list-group">
         {% for message in messages %}
-            <div class="list-group-item">
+            <div class="card-inbox list-group-item">
                 <h5 class="mb-1"><a href="{{ url_for('chat', username=message.sender.username) }}"><strong>{{ message.sender.username }}</strong></a> sent:</h5>
                 <p class="mb-1">{{ message.body }}</p>
                 <small class="text-muted">{{ message.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</small>
