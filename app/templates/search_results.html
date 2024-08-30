@@ -1,6 +1,67 @@
 {% extends "base.html" %}
 {% block title %}Search Results{% endblock %}
 {% block content %}
+    <style>
+        body {
+            background: url(../static/images/bookings.svg) no-repeat center center;
+            background-size: cover;
+            background-attachment: fixed;
+        }
+
+        i {
+            color: #fff;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-img-top {
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .card-title a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            border-radius: 50px;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+            border-radius: 50px;
+        }
+        .container-fluid .card{
+            backdrop-filter: blur(40px);
+            border-radius: 0 0 50px 50px;
+            background-color: transparent;
+            border-color: #fff;
+            border-width: 3px;
+            border-style: solid;
+            box-shadow: rgb(200, 400, 500);
+        }
+        .card-body {
+            backdrop-filter: blur(40px);
+        }
+        .card-ing-top {
+            border-radius: 50px 50px 0 0;
+        }
+    </style>
     <div class="container mt-5">
         <h1 class="mb-4">Search Results for "{{ search_term }}"</h1>
         {% if listings %}
