@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Bed & Breakfast</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/icon.svg') }}">
+</head>
+<body>
+    <div class="container-fluid p-0">
+        <!-- Navigation Bar -->
+        <header>
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <a class="navbar-brand" href="/">
+                    <img src="{{ url_for('static', filename='images/icon.svg') }}" width="30" height="30" class="d-inline-block align-top" alt="">
+                    Bed & Breakfast
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/listings">Listings</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/list-your-property">List Your Property</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/help-center">Help</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Privacy Policy Header -->
+        <section class="jumbotron text-center mb-0">
+            <div class="container">
+                <h1 class="jumbotron-heading">Privacy Policy</h1>
+                <p class="lead text-muted">Your privacy is important to us. This policy explains how we handle your personal data.</p>
+            </div>
+        </section>
+
+        <!-- Privacy Policy Content -->
+        <section class="privacy my-5">
+            <div class="container">
+                <h2>1. Introduction</h2>
+                <p>This Privacy Policy explains how Bed & Breakfast collects, uses, discloses, and protects your information when you visit our website or use our services. By using our website, you consent to the data practices described in this policy.</p>
+
+                <h2>2. Information We Collect</h2>
+                <ul>
+                    <li><strong>Personal Information:</strong> We collect personal information such as your name, email address, phone number, and payment details when you register, book a property, or list a property.</li>
+                    <li><strong>Non-Personal Information:</strong> We collect non-personal data such as browser type, IP address, and browsing behavior using cookies and similar technologies.</li>
+                </ul>
+
+                <h2>3. How We Use Your Information</h2>
+                <p>We use your information for the following purposes:</p>
+                <ul>
+                    <li>To process bookings and payments.</li>
+                    <li>To communicate with you about your account or bookings.</li>
+                    <li>To improve our services and user experience.</li>
+                    <li>To send promotional emails or updates, if you have opted in to receive them.</li>
+                </ul>
+
+                <h2>4. Sharing Your Information</h2>
+                <p>We do not sell your personal information to third parties. We may share your information with trusted third-party service providers who assist us in operating our website, conducting our business, or servicing you, as long as they agree to keep your information confidential.</p>
+
+                <h2>5. Data Security</h2>
+                <p>We implement a variety of security measures to protect your personal information from unauthorized access, use, or disclosure. However, no method of transmission over the internet is 100% secure, and we cannot guarantee its absolute security.</p>
+
+                <h2>6. Cookies and Tracking Technologies</h2>
+                <p>We use cookies and similar technologies to enhance your experience on our website. You can choose to accept or decline cookies. Most web browsers automatically accept cookies, but you can modify your browser settings to decline cookies if you prefer.</p>
+
+                <h2>7. Your Data Rights</h2>
+                <p>You have the right to access, correct, or delete your personal information. You can also object to the processing of your data in certain circumstances. To exercise these rights, please contact us at <a href="mailto:privacy@bnb.com">privacy@bnb.com</a>.</p>
+
+                <h2>8. Third-Party Websites</h2>
+                <p>Our website may contain links to third-party websites. We are not responsible for the privacy practices or content of those sites. We encourage you to read the privacy policies of any third-party sites you visit.</p>
+
+                <h2>9. Changes to This Policy</h2>
+                <p>We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated effective date. Your continued use of our website after any changes indicates your acceptance of the new policy.</p>
+
+                <h2>10. Contact Us</h2>
+                <p>If you have any questions or concerns about this Privacy Policy, please contact us at <a href="mailto:privacy@bnb.com">privacy@bnb.com</a>.</p>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-dark text-white text-center py-3">
+            <p>&copy; {{ current_year }} BnB - All Rights Reserved</p>
+            <p>
+                <a href="/privacy-&-policy" class="text-white mx-2">Privacy Policy</a> | 
+                <a href="/terms-and-conditions" class="text-white mx-2">Terms of Service</a> | 
+                <a href="mailto:support@bnb.com" class="text-white mx-2">Contact Us</a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- JavaScript libraries -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

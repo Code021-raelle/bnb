@@ -87,6 +87,7 @@
 
     <section class="listings">
         <div class="container-fluid">
+            <h2 class="text-center mb-4">Featured Listings</h2>
             <div id="listingCarousel" class="carousel slide" data-ride="carousel">
                 <ol class="carousel-indicators">
                     <li data-target="#listingCarousel" data-slide-to="0" class="active"></li>
@@ -97,26 +98,35 @@
                 <div class="carousel-inner">
                     <!-- First slide -->
                     <div class="carousel-item active">
-                        <img src="{{ url_for('static', filename='images/maryland.jpg') }}" class="d-block w-100" alt="Listing 1">
-                        <div class="carousel-caption d-none d-md-block">
-                            <h5>Listing 1 Title</h5>
-                            <p>Short description of the first listing.</p>
+                        <div class="card">
+                            <img src="{{ url_for('static', filename='images/maryland.jpg') }}" class="card-img-top" alt="Listing 1">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Listing 1 Title</h5>
+                                <p class="card-text">Short description of the first listing.</p>
+                                <a href="#" class="btn btn-primary">View Listing</a>
+                            </div>
                         </div>
                     </div>
                     <!-- Second slide -->
                     <div class="carousel-item">
-                        <img src="{{ url_for('static', filename='images/apartment.jpg') }}" class="d-block w-100" alt="Listing 2">
-                        <div class="carousel-caption d-none d-md-block">
-                            <h5>Listing 2 Title</h5>
-                            <p>Short description of the second listing.</p>
+                        <div class="card">
+                            <img src="{{ url_for('static', filename='images/apartment.jpg') }}" class="card-img-top" alt="Listing 2">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Listing 2 Title</h5>
+                                <p class="card-text">Short description of the second listing.</p>
+                                <a href="#" class="btn btn-primary">View Listing</a>
+                            </div>
                         </div>
                     </div>
                     <!-- Third slide -->
                     <div class="carousel-item">
-                        <img src="{{ url_for('static', filename='images/home.jpg') }}" class="d-block w-100" alt="Listing 3">
-                        <div class="carousel-caption d-none d-md-block">
-                            <h5>Listing 3 Title</h5>
-                            <p>Short description of the third listing.</p>
+                        <div class="card">
+                            <img src="{{ url_for('static', filename='images/home.jpg') }}" class="card-img-top" alt="Listing 3">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Listing 3 Title</h5>
+                                <p class="card-text">Short description of the third listing.</p>
+                                <a href="#" class="btn btn-primary">View Listing</a>
+                            </div>
                         </div>
                     </div>
                     <!-- Add more slides as needed -->
@@ -131,7 +141,8 @@
                 </a>
             </div>
         </div>
-        
+        <div id="mapContainer" style="width: 100%; height: 400px;"></div>
+
     </section>
 
     <!-- Video element --

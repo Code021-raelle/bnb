@@ -19,14 +19,16 @@
             <div class="form-group">
                 {{ form.start_date.label(class="form-label") }}
                 {{ form.start_date(class="form-control") }}
+                <input type="text" class="form-control mr-2" placeholder="Check-in" style="width: 250px; height: 50px; border-radius: 50px;">
             </div>
             <div class="form-group">
                 {{ form.end_date.label(class="form-label") }}
                 {{ form.end_date(class="form-control") }}
+                <input type="text" class="form-control mr-2" placeholder="Check-out" style="width: 250px; height: 50px; border-radius: 50px;">
             </div>
             <div class="form-group">
                 {{ form.submit(class="btn btn-primary") }}
             </div>
         </form>
-    </div>
+    </div> 
 {% endblock %}

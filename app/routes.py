@@ -40,10 +40,6 @@ logging.basicConfig(level=logging.DEBUG)
 @app.route("/home")
 def home():
     form = PreferredCurrencyForm()
-    if form.validate_on_submit():
-        current_user.preferred_currency = form.currency.data
-        db.session.commit()
-        flash('Preferred currency updated!', 'success')
     
     current_year = 2024
     listings = Listing.query.all()
@@ -152,6 +148,24 @@ def apple_authorize():
 def logout():
     logout_user()
     return redirect(url_for('home'))
+
+
+@app.route("/help-center")
+def help():
+    current_year = 2024
+    return render_template('help-center.html', current_year=current_year)
+
+
+@app.route("/terms-and-conditions")
+def terms_and_conditions():
+    current_year = 2024
+    return render_template('terms_and_conditions.html', current_year=current_year)
+
+
+@app.route("/privacy-&-policy")
+def privacy_policy():
+    current_year = 2024
+    return render_template('privacy_policy.html', current_year=current_year)
 
 
 def save_picture(form_picture):

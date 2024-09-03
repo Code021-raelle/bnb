@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help Center - BnB</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/icon.svg') }}">
+</head>
+<body>
+    <div class="container-fluid p-0">
+        <!-- Navigation Bar -->
+         <strong>
+            <header>
+                <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                    <a class="navbar-brand" href="/">
+                        <img src="{{ url_for('static', filename='images/icon.svg') }}" width="30" height="30" class="d-inline-block align-top" alt="">
+                        Bed & Breakfast
+                    </a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav ml-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/listings">Listings</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/list-your-property">List Your Property</a>
+                            </li>
+                            <li class="nav-item active">
+                                <a class="nav-link" href="/help-center">Help <span class="sr-only">(current)</span></a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </header>
+        </strong>
+        
+
+        <!-- Help Center Header -->
+        <section class="jumbotron text-center mb-0">
+            <div class="container">
+                <h1 class="jumbotron-heading">Welcome to Help Center</h1>
+                <p class="lead text-muted">Find answers to common questions or get in touch with us for support.</p>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section class="faq my-5">
+            <div class="container">
+                <h2 class="text-center mb-4">Frequently Asked Questions</h2>
+                <div class="accordion" id="faqAccordion">
+                    <!-- Question 1 -->
+                    <div class="card">
+                        <div class="card-header" id="faqHeading1">
+                            <h2 class="mb-0">
+                                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#faq1" aria-expanded="true" aria-controls="faq1">
+                                    How do I book a property?
+                                </button>
+                            </h2>
+                        </div>
+                        <div id="faq1" class="collapse show" aria-labelledby="faqHeading1" data-parent="#faqAccordion">
+                            <div class="card-body">
+                                To book a property, browse through our listings, select a property, and follow the booking instructions. You will need to provide your payment details to confirm your reservation.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Question 2 -->
+                    <div class="card">
+                        <div class="card-header" id="faqHeading2">
+                            <h2 class="mb-0">
+                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#faq2" aria-expanded="false" aria-controls="faq2">
+                                    How can I list my property?
+                                </button>
+                            </h2>
+                        </div>
+                        <div id="faq2" class="collapse" aria-labelledby="faqHeading2" data-parent="#faqAccordion">
+                            <div class="card-body">
+                                To list your property, navigate to the 'List Your Property' section, complete the registration form, and provide details about your property. Our team will review your submission before it goes live.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Question 3 -->
+                    <div class="card">
+                        <div class="card-header" id="faqHeading3">
+                            <h2 class="mb-0">
+                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#faq3" aria-expanded="false" aria-controls="faq3">
+                                    How do I contact customer support?
+                                </button>
+                            </h2>
+                        </div>
+                        <div id="faq3" class="collapse" aria-labelledby="faqHeading3" data-parent="#faqAccordion">
+                            <div class="card-body">
+                                You can contact our customer support by clicking the 'Contact Us' button below or emailing us at support@bnb.com. We are here to help you 24/7.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add more questions as needed -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Us Section -->
+        <section class="contact-us text-center py-4">
+            <div class="container">
+                <h2>Need More Help?</h2>
+                <p>If you need further assistance, please get in touch with our support team.</p>
+                <a href="mailto:support@bnb.com" class="btn btn-primary">Contact Us</a>
+            </div>
+        </section>
+
+        <footer class="bg-dark text-white text-center py-3">
+            <p>&copy; {{ current_year }} BnB - All Rights Reserved</p>
+            <p>
+                <a href="/privacy-&-policy" class="text-white mx-2">Privacy Policy</a> | 
+                <a href="/terms-and-conditions" class="text-white mx-2">Terms of Service</a> | 
+                <a href="mailto:support@bnb.com" class="text-white mx-2">Contact Us</a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- JavaScript libraries -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

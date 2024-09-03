@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms & Conditions - Bed & Breakfast</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/icon.svg') }}">
+</head>
+<body>
+    <style>
+        body {
+            background: url(../static/images/terms.svg) no-repeat center;
+            background-size: cover;
+        }
+    </style>
+    <div class="container-fluid p-0">
+        <!-- Navigation Bar -->
+        <header>
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <a class="navbar-brand" href="/">
+                    <img src="{{ url_for('static', filename='images/icon.svg') }}" width="30" height="30" class="d-inline-block align-top" alt="">
+                    Bed & Breakfast
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/listings">Listings</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/list-your-property">List Your Property</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/help-center">Help</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Terms & Conditions Header -->
+        <section class="jumbotron text-center mb-0">
+            <div class="container">
+                <h1 class="jumbotron-heading">Terms & Conditions</h1>
+                <p class="lead text-muted">Please read these terms and conditions carefully before using our services.</p>
+            </div>
+        </section>
+
+        <!-- Terms & Conditions Content -->
+        <section class="terms my-5">
+            <div class="container">
+                <h2>1. Introduction</h2>
+                <p>Welcome to Bed & Breakfast. By accessing our website or using our services, you agree to comply with and be bound by the following terms and conditions. If you do not agree with any part of these terms, you may not use our services.</p>
+
+                <h2>2. Use of Services</h2>
+                <p>Our platform allows users to book and list properties. You must be at least 18 years old to use our services. You agree to provide accurate information and to keep your account secure by not sharing your password with others.</p>
+
+                <h2>3. Booking & Payments</h2>
+                <p>All bookings are subject to availability and confirmation by the property owner. Payment must be made at the time of booking using a valid payment method. We are not responsible for any disputes between users and property owners regarding payments.</p>
+
+                <h2>4. Property Listings</h2>
+                <p>Property owners are responsible for providing accurate information about their listings. We reserve the right to remove or modify any listing that violates our policies or is deemed inappropriate.</p>
+
+                <h2>5. Cancellation Policy</h2>
+                <p>Cancellation policies vary by property. Please review the cancellation policy of the specific property before booking. Refunds, if applicable, will be processed according to the property’s terms.</p>
+
+                <h2>6. User Conduct</h2>
+                <p>Users are expected to behave respectfully and not engage in illegal, fraudulent, or harmful activities on our platform. Any violation of these terms may result in account suspension or termination.</p>
+
+                <h2>7. Limitation of Liability</h2>
+                <p>We are not liable for any damages, losses, or injuries resulting from the use of our services. Property owners and users are responsible for their own actions and agreements.</p>
+
+                <h2>8. Privacy Policy</h2>
+                <p>Your privacy is important to us. Please refer to our Privacy Policy for information on how we collect, use, and protect your personal data.</p>
+
+                <h2>9. Changes to Terms</h2>
+                <p>We reserve the right to update these terms at any time. Changes will be effective immediately upon posting on our website. Continued use of our services after any changes constitutes acceptance of the new terms.</p>
+
+                <h2>10. Governing Law</h2>
+                <p>These terms are governed by and construed in accordance with the laws of the jurisdiction where our company is registered. Any disputes will be subject to the exclusive jurisdiction of the courts in that jurisdiction.</p>
+
+                <h2>11. Contact Us</h2>
+                <p>If you have any questions about these terms, please contact us at <a href="mailto:support@bnb.com">support@bnb.com</a>.</p>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-dark text-white text-center py-3">
+            <p>&copy; {{ current_year }} BnB - All Rights Reserved</p>
+            <p>
+                <a href="/privacy-&-policy" class="text-white mx-2">Privacy Policy</a> | 
+                <a href="/terms-and-conditions" class="text-white mx-2">Terms of Service</a> | 
+                <a href="mailto:support@bnb.com" class="text-white mx-2">Contact Us</a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- JavaScript libraries -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -12,6 +12,7 @@
     <link rel="icon" href="{{ url_for('static', filename='images/icon.svg') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="preload" href="{{ url_for('static', filename='images/preload.svg') }}" as="image">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <!-- Maps -->
     <link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
     <script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
@@ -54,6 +55,7 @@
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="{{ url_for('profile', username=current_user.username) }}">Profile</a>
                             <a class="dropdown-item" href="{{ url_for('new_listing') }}">List your property</a>
+                            <a class="dropdown-item" href="{{ url_for('user_listings', username=current_user.username) }}">My Bookings/Listings</a>
                             <a class="dropdown-item" href="{{ url_for('set_currency' )}}">Set Currency</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a>
@@ -121,6 +123,7 @@
     <!-- Bootstrap JS and dependencies -->
     <script src="{{ url_for('static', filename='scripts/base.js') }}"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
