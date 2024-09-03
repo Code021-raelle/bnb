@@ -39,9 +39,15 @@ logging.basicConfig(level=logging.DEBUG)
 @app.route("/")
 @app.route("/home")
 def home():
+    form = PreferredCurrencyForm()
+    if form.validate_on_submit():
+        current_user.preferred_currency = form.currency.data
+        db.session.commit()
+        flash('Preferred currency updated!', 'success')
+    
     current_year = 2024
     listings = Listing.query.all()
-    return render_template('home.html', listings=listings, current_year=current_year)
+    return render_template('home.html', listings=listings, current_year=current_year, form=form)
 
 
 @app.route("/register", methods=['GET', 'POST'])
@@ -436,7 +442,6 @@ def convert_currency(amount, from_currency, to_currency):
 
 
 @app.route('/set_currency', methods=['GET', 'POST'])
-@login_required
 def set_currency():
     form = PreferredCurrencyForm()
     if form.validate_on_submit():

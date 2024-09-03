@@ -6,12 +6,13 @@
             background: url(../static/images/bookings.svg) no-repeat center center;
             background-size: cover;
             background-attachment: fixed;
+            box-sizing: border-box;
+            max-width: 100%;
         }
 
         i {
             color: #fff;
         }
-
         .card {
             border: none;
             border-radius: 10px;
@@ -19,8 +20,8 @@
         }
 
         .card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            transform: translateY(-30px);
+            box-shadow: 0 10px 20px rgba(247, 246, 246, 0.15);
         }
 
         .card-img-top {
@@ -46,20 +47,30 @@
             border-color: #28a745;
             border-radius: 50px;
         }
-        .container-fluid .card{
+
+        .container-fluid .card {
             backdrop-filter: blur(40px);
-            border-radius: 0 0 50px 50px;
+            border-radius: 10px 10px 50px 50px;
             background-color: transparent;
-            border-color: #fff;
+            border-color: #f39006;
             border-width: 3px;
             border-style: solid;
             box-shadow: rgb(200, 400, 500);
         }
+
         .card-body {
             backdrop-filter: blur(40px);
         }
+
         .card-ing-top {
             border-radius: 50px 50px 0 0;
+        }
+
+        /* Make the anchor tag cover the entire card */
+        .card-link {
+            display: block;
+            text-decoration: none;
+            color: inherit;
         }
     </style>
 
@@ -68,20 +79,20 @@
         <div class="row">
             {% for listing in listings.items %}
                 <div class="col-lg-4 col-md-4 col-sm-6 d-flex align-items-stretch">
-                    <div class="card mb-4 shadow-sm">
-                        <img src="{{ url_for('static', filename='images/' ~ listing.image_file) }}" class="card-img-top" alt="{{ listing.title }}">
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">
-                                <a href="{{ url_for('listing', listing_id=listing.id) }}">{{ listing.title }}</a>
-                            </h5>
-                            <p><strong>Price:</strong> {{ price_with_currency }}</p>
-                            <p class="card-text">{{ listing.description | truncate(100) }}</p>
-                            <div class="mt-auto">
-                                <a href="{{ url_for('listing', listing_id=listing.id) }}" class="btn btn-primary btn-block mb-2">View Details</a>
-                                <a href="{{ url_for('book_listing', listing_id=listing.id) }}" class="btn btn-success btn-block">Book Now</a>
+                    <a href="{{ url_for('listing', listing_id=listing.id) }}" class="card-link">
+                        <div class="card mb-4 shadow-sm">
+                            <img src="{{ url_for('static', filename='images/' ~ listing.image_file) }}" class="card-img-top" alt="{{ listing.title }}">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">{{ listing.title }}</h5>
+                                <p><strong>Price:</strong> {{ price_with_currency }}</p>
+                                <p class="card-text">{{ listing.description | truncate(100) }}</p>
+                                <div class="mt-auto">
+                                    <span class="btn btn-primary btn-block mb-2">View Details</span>
+                                    <a href="{{ url_for('book_listing', listing_id=listing.id) }}" class="btn btn-success btn-block">Book Now</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             {% endfor %}
         </div>

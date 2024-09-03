@@ -9,8 +9,11 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='images/icon.svg') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="preload" href="{{ url_for('static', filename='images/preload.svg') }}" as="image">
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-core.js?apikey=CWa4Zb9yiDDfEW1j1RAThuf3YUDEvRJOM1Qfy_McO9M"></script>
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-service.js?apikey=CWa4Zb9yiDDfEW1j1RAThuf3YUDEvRJOM1Qfy_McO9M"></script>
 </head>
 <body>
     <div class="container-fluid p-0">
@@ -28,7 +31,8 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav ml-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="/set_currency">USD</a>
+                            <!-- Trigger modal -->
+                            <a class="nav-link" href="#" data-toggle="modal" data-target="#currencyModal">USD</a>
                         </li>
                         <li class="nav-item active">
                             <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
@@ -38,6 +42,9 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/list-your-property">List your property</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Help</a>
                         </li>
                         <!-- Add more navigation links as needed -->
                     </ul>
@@ -69,6 +76,32 @@
             {% endwith %}
         </div>
 
+        <!-- Currency Modal -->
+        <div class="modal fade" id="currencyModal" tabindex="-1" aria-labelledby="currencyModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="currencyModalLabel">Select Currency</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="POST" action="{{ url_for('set_currency') }}">
+                            {{ form.hidden_tag() }}
+                            <div class="form-group">
+                                {{ form.currency.label(class="form-label") }}
+                                {{ form.currency(class="form-control") }}
+                            </div>
+                            <div class="form-group">
+                                {{ form.submit(class="btn btn-primary") }}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <main role="main" class="role">
             <!-- Main content of the home page -->
             <section class="jumbotron text-center mb-0 slide-up">
@@ -80,6 +113,20 @@
                         <!-- Add more buttons or links here -->
                     </p>
                 </div>
+                <section>
+                    <form class="form-inline justify-content-center mt-4">
+                        <input type="text" id="location-input" class="form-control mr-2" placeholder="Where to?" style="width: 250px; height: 50px; border-radius: 50px;">
+                        <input type="text" class="form-control mr-2" placeholder="Check-in" style="width: 250px; height: 50px; border-radius: 50px;">
+                        <input type="text" class="form-control mr-2" placeholder="Check-out" style="width: 250px; height: 50px; border-radius: 50px;">
+                        <select class="form-control mr-2" style="width: 250px; height: 50px; border-radius: 50px;">
+                            <option>Guests</option>
+                            <option>1 Guest</option>
+                            <option>2 Guests</option>
+                            <option>3 Guests</option>
+                        </select>
+                        <button class="btn btn-primary" style="width: 100px; height: 50px; border-radius: 50px;">Search</button>
+                    </form>
+                </section>
             </section>
 
             <!-- Additional sections or content can be added here -->
@@ -120,8 +167,69 @@
                     </div>
                 </div>
             </section>
-
         </main>
+
+        <section class="listings">
+            <div class="container-fluid">
+                <h2 class="text-center mb-4">Featured Listings</h2>
+                <div id="listingCarousel" class="carousel slide" data-ride="carousel">
+                    <ol class="carousel-indicators">
+                        <li data-target="#listingCarousel" data-slide-to="0" class="active"></li>
+                        <li data-target="#listingCarousel" data-slide-to="1"></li>
+                        <li data-target="#listingCarousel" data-slide-to="2"></li>
+                        <!-- Add more indicators as needed -->
+                    </ol>
+                    <div class="carousel-inner">
+                        <!-- First slide -->
+                        <div class="carousel-item active">
+                            <div class="card">
+                                <img src="{{ url_for('static', filename='images/maryland.jpg') }}" class="card-img-top" alt="Listing 1">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Listing 1 Title</h5>
+                                    <p class="card-text">Short description of the first listing.</p>
+                                    <a href="#" class="btn btn-primary">View Listing</a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Second slide -->
+                        <div class="carousel-item">
+                            <div class="card">
+                                <img src="{{ url_for('static', filename='images/apartment.jpg') }}" class="card-img-top" alt="Listing 2">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Listing 2 Title</h5>
+                                    <p class="card-text">Short description of the second listing.</p>
+                                    <a href="#" class="btn btn-primary">View Listing</a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Third slide -->
+                        <div class="carousel-item">
+                            <div class="card">
+                                <img src="{{ url_for('static', filename='images/home.jpg') }}" class="card-img-top" alt="Listing 3">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Listing 3 Title</h5>
+                                    <p class="card-text">Short description of the third listing.</p>
+                                    <a href="#" class="btn btn-primary">View Listing</a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Add more slides as needed -->
+                    </div>
+                    <a class="carousel-control-prev" href="#listingCarousel" role="button" data-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                    <a class="carousel-control-next" href="#listingCarousel" role="button" data-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Next</span>
+                    </a>
+                </div>
+            </div>
+            <div id="mapContainer" style="width: 100%; height: 400px;"></div>
+
+        </section>
+        
+        
 
         
     </div>
@@ -133,6 +241,7 @@
 
     <!-- JavaScript libraries -->
     <script src="{{ url_for('static', filename='scripts/base.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -157,6 +266,47 @@
             window.addEventListener('scroll', checkSlide);
             checkSlide(); // Run on load in case elements are already in view
         });
+
+        // Initialize HERE platform with your API key
+        var platform = new H.service.Platform({
+            apikey: 'CWa4Zb9yiDDfEW1j1RAThuf3YUDEvRJOM1Qfy_McO9M'
+        });
+
+        var service = platform.getSearchService();
+
+        // Get the input element
+        const locationInput = document.getElementById('location-input');
+
+        // Function to fetch location suggestions based on user input
+        function fetchLocationSuggestions(query) {
+            service.autosuggest({
+                q: query,
+                at: '52.5200,13.4050' // Default location, can be user location
+            }, (result) => {
+                // Handle the suggestions here
+                console.log(result);
+                // You can display suggestions in a dropdown or list format below the input
+            }, (error) => {
+                console.error(error);
+            });
+        }
+
+        // Event listener for input changes
+        locationInput.addEventListener('input', (event) => {
+            const query = event.target.value;
+            if (query.length > 2) {
+                fetchLocationSuggestions(query);
+            }
+        });
+        var defaultLayers = platform.createDefaultLayers();
+        var map = new H.Map(
+            document.getElementById('mapContainer'),
+            defaultLayers.vector.normal.map,
+            {
+                zoom: 10,
+                center: { lat: 52.5, lng: 13.4 }
+            }
+        );
     </script>
 </body>
 </html>
