@@ -79,11 +79,12 @@ class Listing(db.Model):
     price = db.Column(db.Numeric, nullable=False)
     currency = db.Column(db.String(3), default='USD')
     location = db.Column(db.String(100), nullable=False)
-    state = db.Column(db.String(50), nullable=False)
+    state_id = db.Column(db.Integer, db.ForeignKey('state.id'), nullable=True)
     city = db.Column(db.String(50), nullable=False)
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    amenities = db.relationship('ListingAmenity', back_populates='listing')
 
     def __repr__(self):
         return f"Listing('{self.title}', '{self.date_posted}')"
@@ -91,6 +92,38 @@ class Listing(db.Model):
     def format_price(self):
         symbol = get_currency_symbol(self.currency)
         return f"{symbol}{self.price:,.2f}"
+
+
+class State(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    abbreviation = db.Column(db.String(2), nullable=False)
+    listings = db.relationship('Listing', backref='state', lazy=True)
+
+    def __repr__(self):
+        return f'<State {self.name}>'
+    
+
+class Amenity(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    listings = db.relationship('ListingAmenity', back_populates='amenity')
+
+    def __repr__(self):
+        return f'<Amenity {self.name}>'
+
+
+class ListingAmenity(db.Model):
+    __tablename__ = 'listing_amenity'
+    id = db.Column(db.Integer, primary_key=True)
+    listing_id = db.Column(db.Integer, db.ForeignKey('listing.id'), nullable=False)
+    amenity_id = db.Column(db.Integer, db.ForeignKey('amenity.id'), nullable=False)
+    listing = db.relationship('Listing', back_populates='amenities')
+    amenity = db.relationship('Amenity', back_populates='listings')
+
+    def __repr__(self):
+        return f'<ListingAmenity Listing: {self.listing_id}, Amenity: {self.amenity_id}>'
+
 
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)

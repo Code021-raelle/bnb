@@ -85,6 +85,8 @@
                             <div class="card-body d-flex flex-column">
                                 <h5 class="card-title">{{ listing.title }}</h5>
                                 <p><strong>Price:</strong> {{ price_with_currency }}</p>
+                                <p>State: {{ state_id }}</p>
+                                <p>Amenity: {{ amenities }}</p>
                                 <p class="card-text">{{ listing.description | truncate(100) }}</p>
                                 <div class="mt-auto">
                                     <span class="btn btn-primary btn-block mb-2">View Details</span>

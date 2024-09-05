@@ -2,7 +2,7 @@ from flask import render_template, url_for, flash, redirect, request, jsonify, c
 from app import app, db, bcrypt, oauth, socketio
 from decimal import Decimal
 from app.forms import RegistrationForm, LoginForm, ListingForm, SearchForm, BookingForm, ReviewForm, MessageForm, EditProfileForm, PreferredCurrencyForm, ResetPasswordForm, RequestResetForm
-from app.models import User, Listing, Review, Message, Booking, Chat
+from app.models import User, Listing, Review, Message, Booking, Chat, State, Amenity, ListingAmenity
 from flask_login import login_user, current_user, logout_user, login_required
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
@@ -191,6 +191,10 @@ def list_property():
 @login_required
 def new_listing():
     form = ListingForm()
+    # Populate state choices
+    form.state_id.choices = [(state.id, state.name) for state in State.query.order_by(State.name).all()]
+    # Populate amenity choices
+    form.amenities.choices = [(amenity.id, amenity.name) for amenity in Amenity.query.order_by(Amenity.name).all()]
     if form.validate_on_submit():
         if form.image.data:
             image_file = save_picture(form.image.data)
@@ -204,9 +208,16 @@ def new_listing():
             owner=current_user,
             currency=form.currency.data,
             price=form.price.data,
+            state_id=form.state_id.data,
             latitude=form.latitude.data,
             longitude=form.longitude.data
         )
+
+        # Add selected amenities to the listing
+        selected_amenities = Amenity.query.filter(Amenity.id.in_(form.amenity.data)).all()
+        for amenity in selected_amenities:
+            listing.amenities.append(ListingAmenity(amenity=amenity))
+        
         db.session.add(listing)
         db.session.commit()
         flash('Your listing has been created!', 'success')
