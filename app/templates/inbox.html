@@ -8,29 +8,72 @@
             background-attachment: fixed;
             color: #fff;
         }
-        .card-inbox{
-            backdrop-filter: blur(40px);
-            border-radius: 50px;
-            background-color: transparent;
-            border-color: #fff;
-            border-width: 3px;
-            border-style: solid;
-            box-shadow: rgb(200, 400, 500);
+        .card-inbox {
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+            padding: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-        
+        .card-inbox:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        .list-group-item {
+            background: transparent;
+            border: none;
+        }
+        .small {
+            color: #f6f6f6;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+        .modal-content {
+            background-color: #333;
+            color: #fff;
+        }
+        .modal-header, .modal-footer {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .modal-header .close {
+            color: #fff;
+        }
+        .form-control {
+            background-color: #444;
+            color: #fff;
+            border: 1px solid #555;
+        }
     </style>
-    <h1>BnB's Inbox</h1>
+
+    <h1 class="text-center mt-4">My Inbox</h1>
     <div class="card-inbox list-group">
         {% for message in messages %}
             <div class="card-inbox list-group-item">
-                <h5 class="mb-1"><a href="{{ url_for('chat', username=message.sender.username) }}"><strong>{{ message.sender.username }}</strong></a> sent:</h5>
+                <h5 class="mb-1">
+                    <a href="{{ url_for('chat', username=message.sender.username) }}" class="text-decoration-none text-white">
+                        <strong>{{ message.sender.username }}</strong>
+                    </a> sent:
+                </h5>
                 <p class="mb-1">{{ message.body }}</p>
                 <small class="text-muted">{{ message.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</small>
-                <button type="button" href="{{ url_for('chat', username=message.sender.username) }}" class="btn btn-primary btn-sm mt-2 reply-btn" data-sender="{{ message.sender.username }}">Reply</button>
+                <button type="button" class="btn btn-primary btn-sm mt-2 reply-btn" 
+                        data-sender="{{ message.sender.username }}">
+                    Reply
+                </button>
             </div>
         {% else %}
-            <div class="list-group-item">
-                <p>No messages yet.</p>
+            <div class="list-group-item text-center">
+                <p class="small">No messages yet.</p>
             </div>
         {% endfor %}
     </div>
@@ -70,7 +113,11 @@
                     const sender = this.getAttribute('data-sender');
                     document.getElementById('replyTo').innerText = sender;
                     document.getElementById('recipient').value = sender;
-                    $('#replyModal').modal('show');
+                    const replyModal = new bootstrap.Modal(document.getElementById('replyModal'), {
+                        keyboard: true,
+                        backdrop: 'static'
+                    });
+                    replyModal.show();
                 });
             });
         });
