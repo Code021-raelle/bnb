@@ -1,16 +1,22 @@
-from flask import render_template, url_for, flash, redirect, request, jsonify, current_app
+from flask import render_template, url_for, flash, redirect, request, jsonify, current_app, make_response
 from app import app, db, bcrypt, oauth, socketio
 from decimal import Decimal
-from app.forms import RegistrationForm, LoginForm, ListingForm, SearchForm, BookingForm, ReviewForm, MessageForm, EditProfileForm, PreferredCurrencyForm, ResetPasswordForm, RequestResetForm
-from app.models import User, Listing, Review, Message, Booking, Chat, State, Amenity, ListingAmenity
+from flask_socketio import SocketIO, emit
+from app.forms import (RegistrationForm, LoginForm, ListingForm, SearchForm, BookingForm,
+                        ReviewForm, MessageForm, EditProfileForm, PreferredCurrencyForm,
+                        ResetPasswordForm, RequestResetForm)
+from app.models import User, Listing, Review, Message, Booking, Chat, State, Amenity, ListingAmenity, Image
 from flask_login import login_user, current_user, logout_user, login_required
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 from app.utils import send_reset_email
-from PIL import Image
+from PIL import Image as PILImage
+from datetime import datetime, timedelta, date, time
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 import requests
 import secrets
 import logging
+import json
 import os
 
 
@@ -34,6 +40,33 @@ def get_currency_symbol(currency_code):
     return currency_symbols.get(currency_code, currency_code)
 
 logging.basicConfig(level=logging.DEBUG)
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
+
+
+class CustomJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, (date, time)):
+            return obj.isoformat()
+        elif isinstance(obj, datetime):
+            return obj.strftime('%Y-%m-%dT%H:%M:%S')
+        return super(CustomJSONEncoder, self).default(obj)
+
+
+def allowed_file(filename):
+    """Check if the file has an allowed extension."""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def save_picture(files):
+    filenames = []
+
+    for file in files:
+        if allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(current_app.root_path, 'static/images', filename)
+            file.save(file_path)
+            filenames.append(filename)
+
+    return filenames
 
 
 @app.route("/")
@@ -83,9 +116,11 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
+            response = make_response(redirect(url_for('home')))
+            # Sets a cookie for user currency preference
+            response.set_cookie('preferred_currency', 'USD', max_age=60*60*24*30)
             flash('Logged in successfully.', 'success')
-            next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('home'))
+            return response
         else:
             flash('Login Unsuccessful. Please check email and password', 'danger')
     return render_template('login.html', title='Login', form=form)
@@ -168,63 +203,6 @@ def privacy_policy():
     return render_template('privacy_policy.html', current_year=current_year)
 
 
-def save_picture(form_picture):
-    random_hex = secrets.token_hex(8)
-    _, f_ext = os.path.splitext(form_picture.filename)
-    picture_fn = random_hex + f_ext
-    picture_path = os.path.join(current_app.root_path, 'static/images', picture_fn)
-
-    output_size = (300, 300)
-    i = Image.open(form_picture)
-    i.thumbnail(output_size)
-    i.save(picture_path)
-
-    return picture_fn
-
-
-@app.route('/list-your-property')
-def list_property():
-    return render_template('list_property.html')
-
-
-@app.route("/listing/new", methods=['GET', 'POST'])
-@login_required
-def new_listing():
-    form = ListingForm()
-    # Populate state choices
-    form.state_id.choices = [(state.id, state.name) for state in State.query.order_by(State.name).all()]
-    # Populate amenity choices
-    form.amenities.choices = [(amenity.id, amenity.name) for amenity in Amenity.query.order_by(Amenity.name).all()]
-    if form.validate_on_submit():
-        if form.image.data:
-            image_file = save_picture(form.image.data)
-        else:
-            image_file = 'default.jpg'
-        
-        listing = Listing(
-            title=form.title.data,
-            description=form.description.data,
-            image_file=image_file,
-            owner=current_user,
-            currency=form.currency.data,
-            price=form.price.data,
-            state_id=form.state_id.data,
-            latitude=form.latitude.data,
-            longitude=form.longitude.data
-        )
-
-        # Add selected amenities to the listing
-        selected_amenities = Amenity.query.filter(Amenity.id.in_(form.amenity.data)).all()
-        for amenity in selected_amenities:
-            listing.amenities.append(ListingAmenity(amenity=amenity))
-        
-        db.session.add(listing)
-        db.session.commit()
-        flash('Your listing has been created!', 'success')
-        return redirect(url_for('listings'))
-    return render_template('listing.html', title='New Listing', form=form)
-
-
 @app.route("/search", methods=['GET', 'POST'])
 def search():
     search_term = request.args.get('q', '')  # Default to an empty string if no query is provided
@@ -250,26 +228,6 @@ def search():
 
     listings = query.all()
     return render_template('search_results.html', listings=listings, search_term=search_term)
-
-
-
-@app.route("/listing/<int:listing_id>/book", methods=['GET', 'POST'])
-@login_required
-def book_listing(listing_id):
-    listing = Listing.query.get_or_404(listing_id)
-    form = BookingForm()
-    if form.validate_on_submit():
-        booking = Booking(
-            start_date=form.start_date.data,
-            end_date=form.end_date.data,
-            user=current_user,
-            listing=listing
-        )
-        db.session.add(booking)
-        db.session.commit()
-        flash('Your booking has been created!', 'success')
-        return redirect(url_for('home'))
-    return render_template('book_listing.html', title='Book Listing', form=form, listing=listing)
 
 
 @app.route("/user/<string:username>")
@@ -382,10 +340,9 @@ def edit_profile():
         current_user.email = form.email.data
         current_user.about_me = form.about_me.data
 
-        if form.image.data:
-            filename = secure_filename(form.image.data.filename)
-            form.image.data.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            current_user.image = filename
+        if form.picture.data:
+            picture_file = save_picture(form.picture.data)
+            current_user.image_file = picture_file
         
         db.session.commit()
         flash('Your profile has been updated!', 'success')
@@ -401,11 +358,107 @@ def edit_profile():
     return render_template('edit_profile.html', title='Edit Profile', form=form, image_file=image_file)
 
 
-@app.route("/listings")
+@app.route('/list-your-property')
+def list_property():
+    listings = Listing.query.all()
+
+    # Ensure listings is a list of objects, not strings
+    if listings and isinstance(listings[0], str):
+        listings = json.loads(listings)
+
+    return render_template('list_property.html', listings=listings)
+
+
+@app.route("/listing/new", methods=['GET', 'POST'])
+@login_required
+def new_listing():
+    form = ListingForm()
+    # Populate state choices
+    form.state_id.choices = [(state.id, state.name) for state in State.query.order_by(State.name).all()]
+    # Populate amenity choices
+    form.amenities.choices = [(amenity.id, amenity.name) for amenity in Amenity.query.order_by(Amenity.name).all()]
+    if form.validate_on_submit():
+        listing = Listing(
+            title=form.title.data,
+            description=form.description.data,
+            owner=current_user,
+            currency=form.currency.data,
+            price=form.price.data,
+            city=form.city.data,
+            state_id=form.state_id.data,
+            address=form.address.data,
+            latitude=form.latitude.data,
+            longitude=form.longitude.data
+        )
+
+        # Add selected amenities to the listing
+        selected_amenities = Amenity.query.filter(Amenity.id.in_(form.amenities.data)).all()
+        for amenity in selected_amenities:
+            listing.amenities.append(ListingAmenity(amenity=amenity))
+
+        db.session.add(listing)
+        
+        # Save images after creating the listing
+        if form.image.data:
+            for image_file in form.image.data:
+                image_filename = save_picture(image_file)
+                new_image = Image(file_name=image_filename, listing_id=listing.id)
+                db.session.add(new_image)
+        else:
+            default_image = Image(file_name='default.jpg', listing_id=listing.id)
+            db.session.add(default_image)
+
+        db.session.commit()
+        flash('Your listing has been created!', 'success')
+        return redirect(url_for('listings'))
+    return render_template('listing.html', title='New Listing', form=form)
+
+
+@app.route("/listings", methods=['GET', 'POST'])
 def listings():
     page = request.args.get('page', 1, type=int)
-    listings = Listing.query.paginate(page=page, per_page=10)
-    return render_template('listings.html', listings=listings)
+    listings = Listing.query.paginate(page=page, per_page=10, error_out=False)
+    user_currency = current_user.preferred_currency if current_user.is_authenticated else 'USD'
+    
+    for listing in listings.items:
+        if listing.currency != user_currency:
+            converted_price, currency = convert_currency(float(listing.price), listing.currency, user_currency)
+            currency_symbol = get_currency_symbol(user_currency)
+            price_with_currency = f"{currency_symbol}{converted_price:,.2f}"
+        else:
+            currency_symbol = get_currency_symbol(listing.currency)
+            converted_price, currency = listing.price, listing.currency
+            price_with_currency = f"{currency_symbol} {listing.price:,.2f}"
+
+    return render_template('listings.html', listings=listings, price=converted_price, currency=user_currency, price_with_currency=price_with_currency)
+
+
+def convert_currency(amount, from_currency, to_currency):
+    api_key = '3b1249bc5574e03487c01d2c'
+    url = f"https://v6.exchangerate-api.com/v6/{api_key}/latest/{from_currency}"
+    
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an HTTPError for bad responses (4xx and 5xx)
+        
+        data = response.json()
+        
+        if 'conversion_rates' not in data:
+            logging.error("Conversion rates not found in API response.")
+            raise ValueError("Invalid response from currency conversion API.")
+        
+        if to_currency not in data['conversion_rates']:
+            logging.error(f"Currency '{to_currency}' not found in conversion rates.")
+            raise KeyError(f"Currency '{to_currency}' not found.")
+        
+        rate = data['conversion_rates'][to_currency]
+        converted_amount = float(amount) * rate
+        return round(converted_amount, 2), to_currency
+    
+    except (requests.exceptions.RequestException, ValueError) as e:
+        logging.error(f"Request to currency conversion API failed: {e}")
+        return amount, from_currency
+
 
 @app.route("/listing/<int:listing_id>", methods=['GET', 'POST'])
 def listing(listing_id):
@@ -466,6 +519,25 @@ def convert_currency(amount, from_currency, to_currency):
         return amount, from_currency
 
 
+@app.route("/listing/<int:listing_id>/book", methods=['GET', 'POST'])
+@login_required
+def book_listing(listing_id):
+    listing = Listing.query.get_or_404(listing_id)
+    form = BookingForm()
+    if form.validate_on_submit():
+        booking = Booking(
+            start_date=form.start_date.data,
+            end_date=form.end_date.data,
+            user=current_user,
+            listing=listing
+        )
+        db.session.add(booking)
+        db.session.commit()
+        flash('Your booking has been created!', 'success')
+        return redirect(url_for('listings'))
+    return render_template('book_listing.html', title='Book Listing', form=form, listing=listing)
+
+
 @app.route('/set_currency', methods=['GET', 'POST'])
 def set_currency():
     form = PreferredCurrencyForm()
@@ -524,19 +596,131 @@ def checkout(listing_id):
 
 
 @app.route('/update_listing/<int:listing_id>', methods=['GET', 'POST'])
-def update_listing_price(listing_id):
-    listing = Listing.query.get(listing_id)
-    price = request.form.get('price')
-    currency = request.form.get('currency')
-    latitude = request.form.get('latitude')
-    longitude = request.form.get('longitude')
-    listing.price = Decimal(price.replace(',', ''))  # Remove commas and convert to numeric
-    listing.currency = currency
-    listing.latitude = float(latitude)
-    listing.longitude = float(longitude)
-    db.session.commit()
-    flash('Listing updated successfully', 'success')
-    return redirect(url_for('some_view_function'))  # Redirect to an appropriate view
+@login_required
+def update_listing(listing_id):
+    listing = Listing.query.get_or_404(listing_id)
+    
+    # Ensuring that only the listing owner can update the listing
+    if listing.owner != current_user:
+        flash('You do not have permission to update this listing.', 'danger')
+        return redirect(url_for('listing', listing_id=listing.id))
+    
+    form = ListingForm()
+    # Populate state choices
+    form.state_id.choices = [(state.id, state.name) for state in State.query.order_by(State.name).all()]
+    # Populate amenity choices
+    form.amenities.choices = [(amenity.id, amenity.name) for amenity in Amenity.query.order_by(Amenity.name).all()]
+
+    # Populate form with the existing data on GET request
+    if request.method == 'GET':
+        form.title.data = listing.title
+        form.description.data = listing.description
+        form.currency.data = listing.currency
+        form.price.data = listing.price
+        form.state_id.data = listing.state_id
+        form.city.data = listing.city
+        form.address.data = listing.address
+        form.latitude.data = listing.latitude
+        form.longitude.data = listing.longitude
+        form.amenities.data = [amenity.id for amenity in listing.amenities]
+
+    if form.validate_on_submit():
+        listing.title = form.title.data
+        listing.description = form.description.data
+        listing.currency = form.currency.data
+        listing.price = form.price.data
+        listing.state_id = form.state_id.data
+        listing.city = form.city.data
+        listing.address = form.address.data
+        listing.latitude = form.latitude.data
+        listing.longitude = form.longitude.data
+
+        # Update the listing's amenities
+        selected_amenity_ids = form.amenities.data
+        
+        if not selected_amenity_ids:
+            flash('Please select at least one amenity.', 'warning')
+            return render_template('update_listing.html', title='Update Listing', form=form, listing=listing)
+        
+        selected_amenities = Amenity.query.filter(Amenity.id.in_(selected_amenity_ids)).all()
+        
+        # Clear existing amenities
+        db.session.query(ListingAmenity).filter_by(listing_id=listing.id).delete()
+        
+        # Add new amenities
+        for amenity in selected_amenities:
+            listing_amenity = ListingAmenity(listing_id=listing.id, amenity_id=amenity.id)
+            db.session.add(listing_amenity) 
+            
+        
+        try:
+            # Handle image updates if a new image is uploaded
+            if form.image.data:
+                image_filenames = save_picture(form.image.data)
+
+                # Check if image_filenames is a list
+                if isinstance(image_filenames, list):
+                    # Add multiple images
+                    for filename in image_filenames:
+                        new_image = Image(file_name=filename, listing=listing)
+                        db.session.add(new_image)
+                else:
+                    # Add single image
+                    new_image = Image(file_name=image_filenames, listing=listing)
+                    db.session.add(new_image)
+        except ValueError as e:
+            flash(str(e), 'danger')
+
+        try:
+            db.session.commit()
+            flash('Your listing has been updated!', 'success')
+            return redirect(url_for('listing', listing_id=listing.id))
+        except IntegrityError as e:
+            db.session.rollback()
+            flash(f"An error occurred: {str(e)}", 'danger')
+
+    return render_template('update_listing.html', title='Update Listing', form=form, listing=listing)
+
+
+@app.route('/filter_listings', methods=['POSt'])
+def filter_listings():
+    """Filter listings based on user input."""
+    # Get query parameters
+    price_filter = request.json.get('price_filter')
+    rating_filter = request.json.get('rating_filter')
+    amenities_filter = request.json.get('amenities_filter')
+
+    # Apply filters to listings query
+    query = Listing.query
+
+    if price_filter:
+        # Assuming price_filter is a dictionary with min and max values
+        query = query.filter(Listing.price.between(price_filter['min'], price_filter['max']))
+
+    if rating_filter:
+        # Assuming rating_filter is a minimum rating value
+        query = query.filter(Listing.rating >= rating_filter)
+    
+    if amenities_filter:
+        # Assuming amenities_filter is a list of required amenities
+        query = query.filter(Listing.amenities.contains(amenities_filter))
+
+    # Execute the query and get the results
+    filtered_listings = query.all()
+
+    # Convert listings to JSON
+    result = []
+    for listing in filtered_listings:
+        result.append({
+            'id': listing.id,
+            'title': listing.title,
+            'price': listing.price,
+            'rating': listing.rating,
+            'amenities': listing.amenities,
+            # Add other relevant fields here
+        })
+
+    return jsonify(result)
 
 
 @app.route("/reset_password", methods=['GET', 'POST'])
@@ -591,3 +775,83 @@ def get_states():
         return render_template('states.html', states=states)
     else:
         return "Error retrieving data", response.status_code
+
+
+@app.route('/status')
+@login_required
+def status():
+    user = User.query.get(current_user.id)
+    user.last_seen = datetime.utcnow()
+    db.session.commit()
+    return jsonify({'status': 'online'})
+
+@socketio.on('connect')
+def handle_connect():
+    emit('status_update', {'user_id': current_user.id, 'status': 'online'}, broadcast=True)
+    # Check and update statuses of all users
+    status_updates = check_status().json
+    for update in status_updates:
+        emit('status_update', update, broadcast=True)
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    emit('status_update', {'user_id': current_user.id, 'status': 'offline'}, broadcast=True)
+
+
+@app.route('/check_status')
+def check_status():
+    users = User.query.all()
+    status_updates = []
+
+    for user in users:
+        if user.last_seen:
+            delta = datetime.utcnow() - user.last_seen
+            if delta.total_seconds() > 300:
+                status = 'offline'
+            else:
+                status = 'online'
+        else:
+            status = 'offline'
+
+        status_updates.append({'user_id': user.id, 'status': status})
+
+    return jsonify(status_updates)
+
+
+def update_listing_amenity(amenity_id, listing_id):
+    try:
+        # Ensure both IDs are not None
+        if listing_id is None or amenity_id is None:
+            raise ValueError("Both listing_id and amenity_id must be provided")
+
+        # Verify the listing exists
+        listing = Listing.query.get(listing_id)
+        if listing is None:
+            raise ValueError(f"Listing with ID {listing_id} does not exist")
+
+        # Verify the amenity exists
+        amenity = Amenity.query.get(amenity_id)
+        if amenity is None:
+            raise ValueError(f"Amenity with ID {amenity_id} does not exist")
+
+        # Create or update the association
+        existing_association = ListingAmenity.query.filter_by(listing_id=listing_id, amenity_id=amenity_id).first()
+        
+        if existing_association:
+            # Update existing association (if needed)
+            pass  # No update needed since we're just confirming the association exists
+        else:
+            # Create new association
+            new_association = ListingAmenity(listing_id=listing_id, amenity_id=amenity_id)
+            db.session.add(new_association)
+
+        db.session.commit()
+        return True
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating listing amenity: {str(e)}")
+        return False
+
+
+if __name__ == '__main__':
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
