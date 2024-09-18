@@ -81,13 +81,16 @@
                 <div class="col-lg-4 col-md-4 col-sm-6 d-flex align-items-stretch">
                     <a href="{{ url_for('listing', listing_id=listing.id) }}" class="card-link">
                         <div class="card mb-4 shadow-sm">
-                            <img src="{{ url_for('static', filename='images/' ~ listing.image_file) }}" class="card-img-top" alt="{{ listing.title }}">
+                            {% if listing.images|length > 0 %}
+                                <img src="{{ url_for('static', filename='images/' ~ listing.images[0].file_name) }}" class="card-img-top" alt="{{ listing.title }}">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='images/default.jpg') }}" class="card-img-top" alt="{{ listing.title }}">
+                            {% endif %}
                             <div class="card-body d-flex flex-column">
                                 <h5 class="card-title">{{ listing.title }}</h5>
-                                <p><strong>Price:</strong> {{ price_with_currency }}</p>
-                                <p>State: {{ state_id }}</p>
-                                <p>Amenity: {{ amenities }}</p>
-                                <p class="card-text">{{ listing.description | truncate(100) }}</p>
+                                <p><strong>Price:</strong> {{ listing.price }} {{ listing.currency }}</p>
+                                <p class="card-text"><strong>State:</strong> {{ listing.state.name }}</p>
+                                <p class="card-text">{{ listing.description | truncate(50) }}</p>
                                 <div class="mt-auto">
                                     <span class="btn btn-primary btn-block mb-2">View Details</span>
                                     <a href="{{ url_for('book_listing', listing_id=listing.id) }}" class="btn btn-success btn-block">Book Now</a>
