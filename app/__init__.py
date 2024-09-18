@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_admin import Admin
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
 from flask_admin.contrib.sqla import ModelView
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
