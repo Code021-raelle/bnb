@@ -34,6 +34,7 @@ class User(db.Model, UserMixin):
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
     preferred_currency = db.Column(db.String(10), default='USD')
+    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
     #last_message_read_time = db.Column(db.DateTime, default=datetime.utcnow)
     #is_active = db.Column(db.Boolean, default=True)
     #is_deleted = db.Column(db.Boolean, default=False)
@@ -56,7 +57,7 @@ class User(db.Model, UserMixin):
     
     @staticmethod
     def verify_reset_token(token):
-        s = Serializer(app.config['SECRET_keY'])
+        s = Serializer(app.config['SECRET_KEY'])
         try:
             user_id = s.loads(token)['user_id']
         except:
@@ -70,15 +71,24 @@ class User(db.Model, UserMixin):
 def receive_before_insert(mapper, connection, target):
     target.full_name = f'{target.first_name} {target.last_name or ""}'
 
+
+class Image(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    file_name = db.Column(db.String(100), nullable=False, default='default.jpg')
+    listing_id = db.Column(db.Integer, db.ForeignKey('listing.id'), nullable=False)
+    listing = db.relationship('Listing', back_populates='images')
+
+
 class Listing(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
+    images = db.relationship('Image', back_populates='listing', cascade="all, delete-orphan")
     price = db.Column(db.Numeric, nullable=False)
     currency = db.Column(db.String(3), default='USD')
     location = db.Column(db.String(100), nullable=False)
+    address = db.Column(db.String(100), nullable=False)
     state_id = db.Column(db.Integer, db.ForeignKey('state.id'), nullable=True)
     city = db.Column(db.String(50), nullable=False)
     latitude = db.Column(db.Float, nullable=False)
@@ -161,9 +171,7 @@ class Message(db.Model):
     sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     file_path = db.Column(db.String(200), nullable=True)
-
     
-
     def __repr__(self):
         return f'<Message {self.body}>'
 
