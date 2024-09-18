@@ -23,7 +23,7 @@
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
                 <a class="navbar-brand" href="/">
                     <img src="{{ url_for('static', filename='images/icon.svg') }}" width="30" height="30" class="d-inline-block align-top" alt="">
-                    Bed & Breakfast
+                    3ple~R
                 </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -40,7 +40,9 @@
                             <a class="nav-link" href="/list-your-property">List Your Property</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/help-center">Help</a>
+                            <a class="nav-link" href="/help-center" aria-label="Help Center">
+                                <i class="fas fa-question-circle"></i>
+                            </a>
                         </li>
                     </ul>
                 </div>
@@ -59,7 +61,7 @@
         <section class="terms my-5">
             <div class="container">
                 <h2>1. Introduction</h2>
-                <p>Welcome to Bed & Breakfast. By accessing our website or using our services, you agree to comply with and be bound by the following terms and conditions. If you do not agree with any part of these terms, you may not use our services.</p>
+                <p>Welcome to 3ple~R. By accessing our website or using our services, you agree to comply with and be bound by the following terms and conditions. If you do not agree with any part of these terms, you may not use our services.</p>
 
                 <h2>2. Use of Services</h2>
                 <p>Our platform allows users to book and list properties. You must be at least 18 years old to use our services. You agree to provide accurate information and to keep your account secure by not sharing your password with others.</p>
@@ -95,7 +97,7 @@
 
         <!-- Footer -->
         <footer class="bg-dark text-white text-center py-3">
-            <p>&copy; {{ current_year }} BnB - All Rights Reserved</p>
+            <p>&copy; {{ current_year }} 3ple~R - All Rights Reserved</p>
             <p>
                 <a href="/privacy-&-policy" class="text-white mx-2">Privacy Policy</a> | 
                 <a href="/terms-and-conditions" class="text-white mx-2">Terms of Service</a> | 
