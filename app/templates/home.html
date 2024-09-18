@@ -12,8 +12,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="preload" href="{{ url_for('static', filename='images/preload.svg') }}" as="image">
-    <script src="https://js.api.here.com/v3/3.1/mapsjs-core.js?apikey=CWa4Zb9yiDDfEW1j1RAThuf3YUDEvRJOM1Qfy_McO9M"></script>
-    <script src="https://js.api.here.com/v3/3.1/mapsjs-service.js?apikey=CWa4Zb9yiDDfEW1j1RAThuf3YUDEvRJOM1Qfy_McO9M"></script>
+    <script defer src="https://js.api.here.com/v3/3.1/mapsjs-core.js?apikey=CWa4Zb9yiDDfEW1j1RAThuf3YUDEvRJOM1Qfy_McO9M"></script>
+    <script defer src="https://js.api.here.com/v3/3.1/mapsjs-service.js?apikey=CWa4Zb9yiDDfEW1j1RAThuf3YUDEvRJOM1Qfy_McO9M"></script>
+    <!-- Mapbox GL JS -->
+    <script defer src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
 </head>
 <body>
     <div class="container-fluid p-0">
@@ -22,7 +25,7 @@
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
                 <a class="navbar-brand" href="#">
                     <img src="{{ url_for('static', filename='images/icon.svg') }}" width="30" height="30" class="d-inline-block align-top" alt="">
-                    Bed & Breakfast
+                    3ple~R
                 </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -44,13 +47,15 @@
                             <a class="nav-link" href="/list-your-property">List your property</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/help-center">Help</a>
+                            <a class="nav-link" href="/help-center" aria-label="Help Center">
+                                <i class="fas fa-question-circle"></i>
+                            </a>
                         </li>
                         <!-- Add more navigation links as needed -->
                     </ul>
                     <div class="navbar-center">
                         <form class="form-inline my-2 my-lg-0 search-bar" method="GET" action="{{ url_for('search') }}">
-                            <input class="form-control" type="search" placeholder="Search" aria-label="Search" name="q" required>
+                            <input class="form-control" type="search" placeholder="Search for Listings" aria-label="Search" name="q" required>
                             <button type="submit" aria-label="Submit Search">
                                 <i class="fas fa-search"></i>
                             </button>
@@ -106,145 +111,210 @@
             <!-- Main content of the home page -->
             <section class="jumbotron text-center mb-0 slide-up">
                 <div class="container" style="padding: 9rem;">
-                    <h1 class="jumbotron-heading slide-up text-center">Welcome to BnB!</h1>
-                    <p class="lead slide-up text-center">Discover and book amazing places to stay at.</p>
+                    <h1 class="jumbotron-heading slide-up text-center">Welcome to 3ple~R!</h1>
+                    <p class="lead slide-up text-center">Discover, List or book amazing places to stay at.</p>
                     <p class="slide-up text-center">
                         <a href="/listings" class="btn btn-primary my-2">View Listings</a>
                         <!-- Add more buttons or links here -->
                     </p>
                 </div>
-                <section>
-                    <form class="form-inline justify-content-center mt-4">
-                        <input type="text" id="location-input" class="form-control mr-2" placeholder="Where to?" style="width: 250px; height: 50px; border-radius: 50px;">
-                        <input type="text" class="form-control mr-2" placeholder="Check-in" style="width: 250px; height: 50px; border-radius: 50px;">
-                        <input type="text" class="form-control mr-2" placeholder="Check-out" style="width: 250px; height: 50px; border-radius: 50px;">
-                        <select class="form-control mr-2" style="width: 250px; height: 50px; border-radius: 50px;">
-                            <option>Guests</option>
-                            <option>1 Guest</option>
-                            <option>2 Guests</option>
-                            <option>3 Guests</option>
-                        </select>
-                        <button class="btn btn-primary" style="width: 100px; height: 50px; border-radius: 50px;">Search</button>
+                <section class="container my-4">
+                    <form class="d-flex justify-content-center align-items-center">
+                        <!-- Country Input -->
+                        <div class="input-group me-2" style="width: 250px;">
+                            <input type="text" id="country-input" name="country" class="form-control" placeholder="Where to?" aria-label="Destination" style="height: 50px; border-radius: 50px;">
+                            <div id="suggestions" class="suggestions"></div>
+                        </div>
+                
+                        <!-- Check-in Date -->
+                        <div class="input-group me-2" style="width: 250px;">
+                            <input type="date" class="form-control" placeholder="Check-in" aria-label="Check-in Date" style="height: 50px; border-radius: 50px;">
+                        </div>
+                
+                        <!-- Check-out Date -->
+                        <div class="input-group me-2" style="width: 250px;">
+                            <input type="date" class="form-control" placeholder="Check-out" aria-label="Check-out Date" style="height: 50px; border-radius: 50px;">
+                        </div>
+                
+                        <!-- Guests Dropdown -->
+                        <div class="input-group me-2" style="width: 250px;">
+                            <select class="form-control" aria-label="Number of Guests" style="height: 50px; border-radius: 50px;">
+                                <option value="" disabled selected>Guests</option>
+                                <option value="1">1 Guest</option>
+                                <option value="2">2 Guests</option>
+                                <option value="3">3 Guests</option>
+                            </select>
+                        </div>
+                
+                        <!-- Search Button -->
+                        <button type="submit" class="btn btn-primary" style="width: 100px; height: 50px; border-radius: 50px;">
+                            Search
+                        </button>
                     </form>
-                </section>
+                </section>                
             </section>
 
-            <!-- Additional sections or content can be added here -->
-            <section class="about">
+            <!-- About Section -->
+            <section class="about py-5">
                 <div class="container">
                     <div class="row">
                         <div class="col-md-6">
-                            <h2 class="slide-up">About BnB</h2>
-                            <p class="slide-up">BnB is a website that allows users to discover and book amazing places to stay at.</p>
-                            <p class="slide-up">It is a great place to find a place to stay for your next vacation or business trip.</p>
+                            <h2 class="-up">About 3ple~R</h2>
+                            <p class="-up"><B>Raelle Rent Rover</B> is a platform that allows users to list their properties, discover and book unique accommodations around the world, from cozy apartments to luxury villas.</p>
+                            <p class="-up">Whether you're planning a vacation, business trip or weekend getaway, 3ple~R helps you find the perfect place to stay.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <img src="{{ url_for('static', filename='images/apartment.jpg') }}" alt="About BnB" class="img-fluid -up" style="border-radius: 50px;">
                         </div>
                     </div>
                 </div>
             </section>
 
-            <section class="about slide-up">
+            <!-- Why Choose Us Section -->
+            <section class="why-choose-us py-5 bg-light">
                 <div class="container">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h2>About BnB</h2>
-                            <p>BnB is a website that allows users to discover and book amazing places to stay at.</p>
-                            <p>It is a great place to find a place to stay for your next vacation or business trip.</p>
+                    <h2 class="text-center slide-up">Why Choose Us</h2>
+                    <div class="row mt-4">
+                        <div class="col-md-4">
+                            <div class="icon-box text-center -up">
+                                <i class="fas fa-home fa-3x mb-3"></i>
+                                <h4>Wide Selection</h4>
+                                <p>Choose from thousands of properties worldwide, tailored to your needs and budget.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="icon-box text-center -up">
+                                <i class="fas fa-lock fa-3x mb-3"></i>
+                                <h4>Secure Booking</h4>
+                                <p>Our secure platform ensures your personal and payment information is protected.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="icon-box text-center -up">
+                                <i class="fas fa-smile fa-3x mb-3"></i>
+                                <h4>Customer Support</h4>
+                                <p>24/7 customer support to assist you at every step of your booking journey.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
+
+            <!-- Popular Destinaitons Section -->
+            <section class="popular-destinations py-5">
+                <div class="container">
+                    <h2 class="text-center slide-up">Popular Destinations</h2>
+                    <div class="row mt-4">
+                        <div class="col-md-3">
+                            <div class="destination-card -up">
+                                <img src="{{ url_for('static', filename='images/paris.jpg') }}" alt="Destination 1" class="img-fluid">
+                                <h4>Paris</h4>
+                                <p>The city of lights, perfect for romantic getaways.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="destination-card -up">
+                                <img src="{{ url_for('static', filename='images/New_york_times_square-terabass.jpg') }}" alt="Destination 2" class="img-fluid">
+                                <h4 class="mt-2">New York</h4>
+                                <p>Experience the vibrant energy of the Big Apple.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="destination-card -up">
+                                <img src="{{ url_for('static', filename='images/Tokyo.jpg') }}" alt="Destination 3" class="img-fluid">
+                                <h4 class="mt-2">Tokyo</h4>
+                                <p>A blend of traditional and futuristic experiences.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="destination-card -up">
+                                <img src="{{ url_for('static', filename='images/Sydney.webp') }}" alt="Destination 4" class="img-fluid">
+                                <h4 class="mt-2">Sydney</h4>
+                                <p>Explore Austrialia's iconic landmarks and beaches.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <section>
+                
+            </section>
+
+            <!-- Customer Reviews Section -->
+            <section class="customer-reviews py-5 bg-light">
                 <div class="container">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h2>How it works</h2>
-                            <p>1. Browse through the listings and find a place that suits your needs.</p>
-                            <p>2. Click on the listing to view more details.</p>
-                            <p>3. Click on the "Book Now" button to book the listing.</p>
-                            <p>4. Enter your payment information and complete the booking.</p>
-                            <p>5. Enjoy your stay!</p>
+                    <h2 class="text-center slide-up">What Our Customers Say</h2>
+                    <div class="row mt-4">
+                        <div class="col-md-4 slide-up">
+                            <blockquote class="blockquote text-center">
+                                <p class="mb-0">"3ple R made my vacation planning so easy! The place we stayed was amazing and just as described."</p>
+                                <footer class="blockquote-footer">Sarah L.</footer>
+                            </blockquote>
+                        </div>
+                        <div class="col-md-4 slide-up">
+                            <blockquote class="blockquote text-center">
+                                <p class="mb-0">"A seamless booking process and the property was exactly as advertised. Highly recommended!"</p>
+                                <footer class="blockquote-footer">Emily R.</footer>
+                            </blockquote>
+                        </div>
+                        <div class="col-md-4 slide-up">
+                            <blockquote class="blockquote text-center">
+                                <p class="mb-0">"A seamless booking process and the property was exactly as advertised. Highly recommended!"</p>
+                                <footer class="blockquote-footer">Emily R.</footer>
+                            </blockquote>
                         </div>
                     </div>
+                </div>
+            </section>
+
+            <!-- Sign in or register option section -->
+            <section class="sign-in-or-register py-5 ">
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-md-6 ">
+                            <h2 class=" -up">Home of Discovery</h2>
+                            <p class="lead -up">Sign up to start booking your dream vacation today!</p>
+                            <a href="{{ url_for('register') }}" class="btn btn-primary btn-block mb-2">Register</a>
+                            <a href="{{ url_for('login') }}" class="btn btn-success btn-block">Sign in</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Property Management Section -->
+            <section class="property-management py-5  slide-up">
+                <div class="container text-center mb-2">
+                    <strong><p style="color: rgb(255, 217, 5);">Rent made easy with Raelle Rent Rover.</p></strong>
+                    <h2 class="text-center -up" style="color: rgb(255, 217, 5);"><b><i>List Your Property with Us</i></b></h2>
+                    
+                    <p class="text-center mt-4 g-up">
+                        <a href="/list-your-property" class="btn btn-warning btn-lg" target="_blank" style="border-radius: 50px;">Rent your property</a>
+                    </p>
                 </div>
             </section>
         </main>
-
-        <section class="listings">
-            <div class="container-fluid">
-                <h2 class="text-center mb-4">Featured Listings</h2>
-                <div id="listingCarousel" class="carousel slide" data-ride="carousel">
-                    <ol class="carousel-indicators">
-                        <li data-target="#listingCarousel" data-slide-to="0" class="active"></li>
-                        <li data-target="#listingCarousel" data-slide-to="1"></li>
-                        <li data-target="#listingCarousel" data-slide-to="2"></li>
-                        <!-- Add more indicators as needed -->
-                    </ol>
-                    <div class="carousel-inner">
-                        <!-- First slide -->
-                        <div class="carousel-item active">
-                            <div class="card">
-                                <img src="{{ url_for('static', filename='images/maryland.jpg') }}" class="card-img-top" alt="Listing 1">
-                                <div class="card-body text-center">
-                                    <h5 class="card-title">Listing 1 Title</h5>
-                                    <p class="card-text">Short description of the first listing.</p>
-                                    <a href="#" class="btn btn-primary">View Listing</a>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Second slide -->
-                        <div class="carousel-item">
-                            <div class="card">
-                                <img src="{{ url_for('static', filename='images/apartment.jpg') }}" class="card-img-top" alt="Listing 2">
-                                <div class="card-body text-center">
-                                    <h5 class="card-title">Listing 2 Title</h5>
-                                    <p class="card-text">Short description of the second listing.</p>
-                                    <a href="#" class="btn btn-primary">View Listing</a>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Third slide -->
-                        <div class="carousel-item">
-                            <div class="card">
-                                <img src="{{ url_for('static', filename='images/home.jpg') }}" class="card-img-top" alt="Listing 3">
-                                <div class="card-body text-center">
-                                    <h5 class="card-title">Listing 3 Title</h5>
-                                    <p class="card-text">Short description of the third listing.</p>
-                                    <a href="#" class="btn btn-primary">View Listing</a>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Add more slides as needed -->
-                    </div>
-                    <a class="carousel-control-prev" href="#listingCarousel" role="button" data-slide="prev">
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="sr-only">Previous</span>
-                    </a>
-                    <a class="carousel-control-next" href="#listingCarousel" role="button" data-slide="next">
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="sr-only">Next</span>
-                    </a>
-                </div>
-            </div>
-            <div id="mapContainer" style="width: 100%; height: 400px;"></div>
-
-        </section>
-        
-        
-
-        
     </div>
+
+    <section class="map-section py-5">
+        <div id="map" style="height: 400px;"></div>
+    </section>
+    
+
     <footer class="text-muted text-center slide-up">
         <div class="container">
-            <p>&copy; BnB - {{ current_year }}</p>
+            <p>&copy; 3ple~R - {{ current_year }}</p>
         </div>
     </footer>
 
     <!-- JavaScript libraries -->
-    <script src="{{ url_for('static', filename='scripts/base.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script defer src="{{ url_for('static', filename='scripts/base.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='scripts/map.js') }}"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+    <script defer src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
+    <script defer src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var slideElements = document.querySelectorAll('.slide-up');
@@ -267,46 +337,81 @@
             checkSlide(); // Run on load in case elements are already in view
         });
 
-        // Initialize HERE platform with your API key
-        var platform = new H.service.Platform({
-            apikey: 'CWa4Zb9yiDDfEW1j1RAThuf3YUDEvRJOM1Qfy_McO9M'
+        mapboxgl.accessToken = 'pk.eyJ1IjoicmFlbGxlcyIsImEiOiJjbHl1M3Fzc2cweXVwMnFzNm5xeGlna213In0.ENF47rwSL_wPYu-SWfhI4Q';
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [6.5243793, 3.3792057],
+            zoom: -5
+        })
+
+        const input = document.getElementById('country-input');
+        const suggestionsBox = document.getElementById('suggestions');
+
+        // Function to fetch suggestions from Mapbox Geocoding API
+        input.addEventListener('input', function () {
+            const query = input.value.trim();
+            if (query.length > 0) {
+                fetch(`https://api.mapbox.com/search/searchbox/v1/suggest?q=${query}&access_token=pk.eyJ1Ijoic2VhcmNoLW1hY2hpbmUtdXNlci0xIiwiYSI6ImNrNnJ6bDdzdzA5cnAza3F4aTVwcWxqdWEifQ.RFF7CVFKrUsZVrJsFzhRvQ&session_token=c856ad82-2fdf-487a-b890-3d37fb61e1f1&language=en&limit=10&types=country%2Cregion%2Cdistrict%2Cpostcode%2Clocality%2Cplace%2Cneighborhood%2Caddress%2Cpoi%2Cstreet%2Ccategory&proximity=3.3792057%2C6.5243793`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.suggestions) {
+                        showSuggestions(data.suggestions);
+                    } else {
+                        suggestionsBox.innerHTML = `<div class="suggestion-item">No results found</div>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching suggestions:', error);
+                });
+            } else {
+                suggestionsBox.innerHTML = '';
+            }
         });
 
-        var service = platform.getSearchService();
-
-        // Get the input element
-        const locationInput = document.getElementById('location-input');
-
-        // Function to fetch location suggestions based on user input
-        function fetchLocationSuggestions(query) {
-            service.autosuggest({
-                q: query,
-                at: '52.5200,13.4050' // Default location, can be user location
-            }, (result) => {
-                // Handle the suggestions here
-                console.log(result);
-                // You can display suggestions in a dropdown or list format below the input
-            }, (error) => {
-                console.error(error);
+        // Display suggestions
+        function showSuggestions(suggestions) {
+            suggestionsBox.innerHTML = '';
+            suggestions.forEach(suggestion => {
+                const div = document.createElement('div');
+                div.classList.add('suggestion-item');
+                div.textContent = suggestion.name;
+                div.addEventListener('click', () => selectSuggestion(suggestion));
+                suggestionsBox.appendChild(div);
             });
         }
 
-        // Event listener for input changes
-        locationInput.addEventListener('input', (event) => {
-            const query = event.target.value;
-            if (query.length > 2) {
-                fetchLocationSuggestions(query);
-            }
+        // Handle suggestion click
+        function selectSuggestion(suggestion) {
+            input.value = suggestion.name;
+            suggestionsBox.innerHTML = '';
+            const [longitude, latitude] = suggestion.geometry.coordinates;
+            map.flyTo({
+                center: [longitude, latitude],
+                zoom: 10
+            });
+            // Add a marker at the selected location
+            new mapboxgl.Marker()
+                .setLngLat([longitude, latitude])
+                .addTo(map);
+        }
+
+        // Add markers for popular destinations
+        const destinations = [
+            { name: 'Paris', coordinates: [2.3522, 48.8566] },
+            { name: 'New York', coordinates: [-74.0060, 40.7128] },
+            { name: 'Tokyo', coordinates: [139.6917, 35.6895] },
+            { name: 'Sydney', coordinates: [151.2093, -33.8688] },
+            { name: 'Nigeria', coordinates: [9.0829, 8.6753] }
+        ];
+
+        destinations.forEach(destination => {
+            new mapboxgl.Marker()
+                .setLngLat(destination.coordinates)
+                .setPopup(new mapboxgl.Popup({ offset: 25 })
+                    .setHTML(`<h3>${destination.name}</h3>`))
+                .addTo(map);
         });
-        var defaultLayers = platform.createDefaultLayers();
-        var map = new H.Map(
-            document.getElementById('mapContainer'),
-            defaultLayers.vector.normal.map,
-            {
-                zoom: 10,
-                center: { lat: 52.5, lng: 13.4 }
-            }
-        );
     </script>
 </body>
 </html>
