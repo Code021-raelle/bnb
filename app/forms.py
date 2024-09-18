@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileAllowed, FileRequired
+from flask_wtf.file import FileField, FileAllowed, FileRequired, MultipleFileField
 from wtforms.fields import DateField
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField, IntegerField, FloatField, SelectMultipleField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, NumberRange, Optional
@@ -23,15 +23,15 @@ class LoginForm(FlaskForm):
 
 class ListingForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
-    image = FileField('Image', validators=[FileAllowed(['jpg', 'png', 'jpeg'])])
+    image = MultipleFileField('Images', validators=[FileAllowed(['jpg', 'png', 'jpeg'])])
     description = TextAreaField('Description', validators=[DataRequired()])
     price = StringField('Price', validators=[DataRequired(), Length(min=1, max=20)])
     currency = SelectField('Currency', choices=[('USD', 'USD'), ('EUR', 'EUR'), ('GBP', 'GBP'), ('NGN', 'NGN')])
     state_id = SelectField('State', coerce=int, choices=[], validators=[DataRequired()])
-    city = TextAreaField('City', validators=[DataRequired()])
-    location = TextAreaField('Address', validators=[DataRequired()])
-    latitude = FloatField('Latitude', validators=[DataRequired()])
-    longitude = FloatField('Longitude', validators=[DataRequired()])
+    city = StringField('City', validators=[DataRequired()])
+    address = StringField('Address', validators=[DataRequired()])
+    latitude = FloatField('Latitude', render_kw={'readonly': True}, validators=[DataRequired()])
+    longitude = FloatField('Longitude', render_kw={'readonly': True}, validators=[DataRequired()])
     amenities = SelectMultipleField('Amenities', coerce=int, choices=[], validators=[DataRequired()])
     submit = SubmitField('Post Listing')
 
