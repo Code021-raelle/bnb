@@ -1,31 +1,65 @@
 {% extends "base.html" %}
 {% block title %}
-    {% if listing %}
-        {{ listing.title }}
-    {% else %}
-        New Listing
-    {% endif %}
+    {{ listing.title if listing else "New Listing" }}
 {% endblock %}
 {% block content %}
 <style>
-    /*body {
-        background: url(../static/images/yellow.svg) no-repeat center;
+    body {
+        background: url(../static/images/bookings.svg) no-repeat center center;
         background-size: cover;
-    }*/
+        background-attachment: fixed;
+        box-sizing: border-box;
+        max-width: 100%;
+    }
+    .listing-details {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+    .listing-image {
+        max-width: 400px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .listing-image img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+    }
+    .star-rating {
+        color: #FFD700;
+    }
 </style>
+
 <div class="mt-4">
     {% if listing %}
         <h1 class="mb-3">{{ listing.title }}</h1>
-        <div class="col-md-4 d-flex align-items-stretch">
-            <img src="{{ url_for('static', filename='images/' ~ listing.image_file) }}" class="card-img-top" alt="{{ listing.title }}">
+        <div class="listing-details">
+            <!-- Image Section -->
+            {% for image in listing.images %}
+                <div class="listing-image col-md-4 d-flex align-items-stretch mb-3">
+                    <img src="{{ url_for('static', filename='images/' ~ listing.images[0].file_name) }}" class="card-img-top" alt="{{ listing.title }}">
+                </div>
+            {% endfor %}
+
+            <!-- Listing Details Section -->
+            <div class="listing-info">
+                <p class="mt-3">{{ listing.description }}</p>
+                <p><strong>Price:</strong> {{ price_with_currency }}</p>
+                <p><strong>Location:</strong> {{ listing.location }}</p>
+                <p><strong>Amenity:</strong>
+                    {% for amenity in listing.amenities %}
+                        {{ amenity.amenity.name }},
+                    {% endfor %}
+                </p>
+                <p><strong>Posted on:</strong> {{ listing.date_posted }}</p>
+                <h2 class="mt-4">Location</h2>
+                <div id="map" style="height: 400px; border-radius: 8px;"></div>
+            </div>
         </div>
-        <p class="mt-3">{{ listing.description }}</p>
-        <p><strong>Price:</strong> {{ price_with_currency }}</p>
-        
-        <h2 class="mt-4">Location</h2>
-        <div id="map" style="height: 400px;"></div>
 
         <hr>
+        <!-- Reviews Section -->
         <h2 class="mt-4">Reviews</h2>
         <form method="POST" class="mb-4">
             {{ form.hidden_tag() }}
@@ -40,19 +74,21 @@
             {{ form.submit(class="btn btn-primary") }}
         </form>
 
-        <hr>
+        <!-- Display Reviews -->
         <div class="row listing-grid">
             {% for review in reviews.items %}
                 <div class="col-md-4 mb-4">
                     <div class="card review-card h-100">
                         <div class="card-body">
                             <p><strong><i>{{ review.user.username }}</i></strong>
-                                {% for i in range(1, review.rating + 1) %}
-                                    <i class="fas fa-star"></i>
-                                {% endfor %}
-                                {% for i in range(review.rating + 1, 6) %}
-                                    <i class="far fa-star"></i>
-                                {% endfor %}
+                                <span class="star-rating">
+                                    {% for i in range(review.rating) %}
+                                        <i class="fas fa-star"></i>
+                                    {% endfor %}
+                                    {% for i in range(review.rating, 5) %}
+                                        <i class="far fa-star"></i>
+                                    {% endfor %}
+                                </span>
                             </p>
                             <p>{{ review.comment }}</p>
                             <p>{{ review.timestamp.strftime('%Y-%m-%d') }}</p>
@@ -64,6 +100,7 @@
             {% endfor %}
         </div>
 
+        <!-- Pagination Controls -->
         <div class="d-flex justify-content-between">
             {% if reviews.has_prev %}
                 <a class="btn btn-secondary" href="{{ url_for('listing', listing_id=listing.id, page=reviews.prev_num) }}">Previous</a>
@@ -73,6 +110,7 @@
             {% endif %}
         </div>
     {% else %}
+        <!-- New Listing Form -->
         <h1 class="mb-3"><b>Create a New Listing</b></h1>
         <form method="POST" enctype="multipart/form-data" class="list-form">
             {{ form.hidden_tag() }}
@@ -82,7 +120,7 @@
             </div>
             <div class="form-group">
                 {{ form.image.label(class="form-label") }}
-                {{ form.image(class="form-control-file") }}
+                {{ form.image(class="form-control-file", multiple=True) }}
             </div>
             <div class="form-group">
                 {{ form.description.label(class="form-label") }}
@@ -104,72 +142,158 @@
                 {{ form.state_id.label(class="form-label") }}
                 {{ form.state_id(class="form-control") }}
             </div>
-            <div class="form-group">
-                {{ form.city.label(class="form-label") }}
-                {{ form.city(class="form-control") }}
+            <div class="form-group"></div>
+                <label for="address" class="form-label">Address</label>
+                <input type="text" id="address" name="address" class="form-control" placeholder="Enter full address">
             </div>
             <div class="form-group">
-                {{ form.longitude.label(class="form-label") }}
-                {{ form.longitude(class="form-control") }}
+                <label for="city" class="form-label">City</label>
+                <input type="text" id="city" name="city" class="form-control" placeholder="Enter city">
             </div>
             <div class="form-group">
-                {{ form.latitude.label(class="form-label") }}
-                {{ form.latitude(class="form-control") }}
+                <label for="latitude" class="form-label">Latitude</label>
+                <input type="number" id="latitude" name="latitude" class="form-control">
             </div>
-            <div id="map" style="height: 400px;"></div>
-            <!-- Add other form fields here -->
+            <div class="form-group">
+                <label for="longitude" class="form-label">Longitude</label>
+                <input type="number" id="longitude" name="longitude" class="form-control">
+            </div>
+            <div id="map" style="height: 400px; border-radius: 8px;"></div>
+            <div id="geocoder-container"></div>
             {{ form.submit(class="btn btn-primary mt-4") }}
-        </form>
+        </form>    
+
     {% endif %}
 </div>
 
 <script>
-    // Initialize the map
+    if (!window.MapboxGeocoder) {
+        console.error('MapboxGeocoder not loaded');
+    }
+
+    // Initialize the map with Mapbox
     document.addEventListener('DOMContentLoaded', function() {
-            mapboxgl.accessToken = 'pk.eyJ1IjoicmFlbGxlcyIsImEiOiJjbHl1M3Fzc2cweXVwMnFzNm5xeGlna213In0.ENF47rwSL_wPYu-SWfhI4Q';
-            var map = new mapboxgl.Map({
-                container: 'map',
-                style: 'mapbox://styles/mapbox/streets-v11',
-                center: [{{ listing.longitude if listing else 0 }}, {{ listing.latitude if listing else 0 }}],
-                zoom: 13
-            });
+    mapboxgl.accessToken = 'pk.eyJ1IjoicmFlbGxlcyIsImEiOiJjbHl1M3Fzc2cweXVwMnFzNm5xeGlna213In0.ENF47rwSL_wPYu-SWfhI4Q';
+    
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v11',
+        center: [{{ listing.longitude if listing else -122.084051 }}, {{ listing.latitude if listing else 37.385348 }}],
+        zoom: 13
+    });
 
-            {% if listing %}
-                new mapboxgl.Marker()
-                    .setLngLat([{{ listing.longitude }}, {{ listing.latitude }}])
-                    .setPopup(new mapboxgl.Popup({ offset: 25 }).setText('{{ listing.title }}: {{ listing.description }}'))
-                    .addTo(map);
-                map.setCenter([{{ listing.longitude }}, {{ listing.latitude }}]);
-            {% else %}
-                var marker;
-                map.on('click', function(e) {
-                    if (marker) {
-                        marker.setLngLat(e.lngLat);
-                    } else {
-                        marker = new mapboxgl.Marker()
-                            .setLngLat(e.lngLat)
-                            .addTo(map);
-                    }
-                    document.querySelector('input[name="latitude"]').value = e.lngLat.lat;
-                    document.querySelector('input[name="longitude"]').value = e.lngLat.lng;
-                });
-            {% endif %}
-
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    var userLocation = [position.coords.longitude, position.coords.latitude];
-                    map.setCenter(userLocation);
-                    map.setZoom(13);
-                    new mapboxgl.Marker()
-                        .setLngLat(userLocation)
-                        .setPopup(new mapboxgl.Popup({ offset: 25 }).setText('Your location'))
-                        .addTo(map);
-                }, function() {
-                    console.log("Geolocation permission denied.");
-                });
-            } else {
-                console.log("Geolocation is not supported by this browser.");
+    {% if listing %}
+        // Add a marker to the map
+        new mapboxgl.Marker()
+            .setLngLat([{{ listing.longitude }}, {{ listing.latitude }}])
+            .setPopup(new mapboxgl.Popup({ offset: 25 }).setText("{{ listing.title }}: {{ url_for('static', filename='images/' ~ listing.images.file_name) }} {{ listing.description }}"))
+            .addTo(map);
+        map.setCenter([{{ listing.longitude }}, {{ listing.latitude }}]);
+    {% else %}
+        // Interactive marker for new listing
+        var marker;
+        map.on('click', function(e) {
+            if (marker) {
+                marker.remove();
             }
+            marker = new mapboxgl.Marker()
+                .setLngLat(e.lngLat)
+                .addTo(map);
+            document.querySelector('input[name="latitude"]').value = e.lngLat.lat;
+            document.querySelector('input[name="longitude"]').value = e.lngLat.lng;
         });
+    {% endif %}
+
+    // Optional: User Geolocation
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            var userLocation = [position.coords.longitude, position.coords.latitude];
+            map.setCenter(userLocation);
+            map.setZoom(13);
+            new mapboxgl.Marker()
+                .setLngLat(userLocation)
+                .setPopup(new mapboxgl.Popup({ offset: 25 }).setText('Your location'))
+                .addTo(map);
+        }, function() {
+            console.log("Geolocation permission denied.");
+        });
+    }
+
+    const geocoder = new MapboxGeocoder({
+        accessToken: mapboxgl.accessToken,
+        mapboxgl: mapboxgl,
+        marker: false
+    });
+
+    geocoder.addTo('#geocoder-container');
+
+    // Function to update map and inputs based on coordinates
+    function updateMapAndInputs(lngLat) {
+        map.setCenter(lngLat);
+        map.setZoom(14);
+
+        document.getElementById('longitude').value = lngLat[0].toFixed(6);
+        document.getElementById('latitude').value = lngLat[1].toFixed(6);
+
+        // Reverse geocode to get city and address
+        fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${lngLat[0]},${lngLat[1]}.json?access_token=${mapboxgl.accessToken}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.features && data.features.length > 0) {
+                    const feature = data.features[0];
+                    document.getElementById('city').value = feature.place_name.split(',')[0];
+                    document.getElementById('address').value = feature.place_name;
+                }
+            })
+            .catch(error => console.error('Error reverse geocoding:', error));
+    }
+
+    // Add event listeners for manual input
+    ['address', 'city'].forEach(id => {
+        document.getElementById(id).addEventListener('input', debounce(function() => {
+            const address = document.getElementById('address').value.trim();
+            const city = document.getElementById('city').value.trim();
+
+            if (address || city) {
+                fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}${city ? `,${encodeURIComponent(city)}` : ''}.json?access_token=${mapboxgl.accessToken}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.features && data.features.length > 0) {
+                            const feature = data.features[0];
+                            updateMapAndInputs(feature.center);
+                        }
+                    })
+                    .catch(error => console.error('Error fetching geocoding data:', error));
+            }
+        }, 500));
+    });
+
+    // Add event listener for latitude and longitude inputs
+    ['latitude', 'longitude'].forEach(id => {
+        document.getElementById(id).addEventListener('input', debounce(function() {
+            const lat = parseFloat(document.getElementById('latitude').value);
+            const lng = parseFloat(document.getElementById('longitude').value);
+            if (!isNaN(lat) && !isNaN(lng)) {
+                updateMapAndInputs([lng, lat]);
+                map.setZoom(14);
+            }
+        }, 500));
+    });
+
+    // Debounce function to limit API calls
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+});
 </script>
+
+<div id="geocoder-container"></div>
 {% endblock %}
