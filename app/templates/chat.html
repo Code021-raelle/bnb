@@ -1,164 +1,81 @@
 {% extends "base.html" %}
-{% block title %}Chats{% endblock %}
+{% block title %}{{ user.username }}{% endblock %}
 {% block content %}
-    <style>
-        body {
-            background: url("{{ url_for('static', filename='images/inbox.svg') }}") no-repeat center center;
-            background-size: cover;
-            background-attachment: fixed;
-        }
-    </style>
-    <div class="chat-container">
-        <div class="chat-header">
-            <i><h1>{{ user.username }}</h1></i>
-        </div>
-        <div class="chat-messages">
-            
-            {% for message in messages %}
-                <div class="chat-message {% if message.sender == current_user %}sent{% else %}received{% endif %}">
-                    <div class="chat-message-content">
-                        <img src="{{ url_for('static', filename='images/' ~ message.sender.image_file) }}" alt="profile picture" class="chat-message-avatar">
-                        <div class="chat-message-bubble">
-                            <p>{{ message.body }}</p>
-                            <span class="chat-message-timestamp">{{ message.timestamp.strftime('%H:%M') }}</span>
-                        </div>
-                    </div>
+<div class="container-fluid p-0">
+    <div class="row no-gutters">
+        <div class="col-md-12">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <h5>{{ user.username }}</h5>
+                    <small id="status-indicator">{{ user.last_seen.status }}</small>
                 </div>
-            {% else %}
-                <p class="no-messages">No messages yet.</p>
-            {% endfor %}
-        </div>
-        <div class="chat-reply">
-            <form method="POST" action="{{ url_for('reply_message') }}">
-                <input type="hidden" name="recipient" id="recipient" value="{{ user.username }}">
-                <div class="input-group">
-                    <input type="text" class="form-control" id="message" name="message" placeholder="Type a message" required>
-                    <div class="input-group-append">
-                        <!--input type="file" class="form-control-file" id="file" name="file" accept="image/*,application/pdf,application/msword"-->
-                        <button type="button" class="btn btn-secondary" id="recordVoice"><i class="fas fa-microphone"></i></button>
-                        <button type="button" class="btn btn-info" id="videoCall"><i class="fas fa-video"></i></button>
-                        <button type="submit" class="btn btn-primary">Send</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
 
-    <!-- Modal for reply -->
-    <div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="replyModalLabel">Reply to <span id="replyTo"></span></h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form method="POST" action="{{ url_for('reply_message') }}">
-                        <input type="hidden" name="recipient" id="modal-recipient" value="">
-                        <div class="form-group">
-                            <label for="modal-message">Message</label>
-                            <textarea class="form-control" id="modal-message" name="message" rows="3" required></textarea>
+                <div class="chat-messages">  `
+                    {% for message in messages %}
+                        <div class="message {% if message.sender_id == current_user.id %}sent{% else %}received{% endif %}">
+                            <span class="message-text">
+                                {{ message.body }}
+                                <span class="message-time">{{ message.timestamp.strftime('%H:%M') }}</span>
+                            </span>
                         </div>
-                        <button type="submit" class="btn btn-primary">Send Reply</button>
-                    </form>
+                    {% endfor %}
                 </div>
+
+                <form action="" method="post" class="chat-input-form">
+                    {{ form.hidden_tag() }}
+                    <input type="text" id="message-input" name="body" placeholder="Message..." required>
+                    <button type="submit" id="send-button"><i class="fas fa-paper-plane"></i></button>
+                </form>
             </div>
         </div>
     </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
-    {{ super() }}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const ws = new WebSocket('ws://localhost:5000/ws');  // Replace with your WebSocket server URL
+<script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+<script>
+$(document).ready(function() {
+    var socket = io();
 
-            ws.onmessage = function(event) {
-                const data = JSON.parse(event.data);
-                if (data.type === 'message') {
-                    const message = data.message;
-                    const chatMessages = document.querySelector('.chat-messages');
-                    const newMessageElement = document.createElement('div');
-                    newMessageElement.className = `chat-message ${message.sender === current_user ? 'sent' : 'received'}`;
-                    newMessageElement.innerHTML = `
-                        <div class="chat-message-content">
-                            <img src="{{ url_for('static', filename='images/profile_placeholder.png') }}" alt="profile picture" class="chat-message-avatar">
-                            <div class="chat-message-bubble">
-                                ${message.file_path ? `<audio controls><source src="{{ url_for('static', filename=message.file_path) }}" type="audio/wav"></audio>` : `<p>${message.body}</p>`}
-                                <span class="chat-message-timestamp">${message.timestamp}</span>
-                            </div>
-                        </div>
-                    `;
-                    chatMessages.appendChild(newMessageElement);
-                }
-            };
+    // Update status indicator
+    socket.on('status_update', function(data) {
+        if (data.user_id == '{{ user.id }}') {
+            $('#status-indicator').text(data.status);
+        }
+    });
 
-            const messageForm = document.getElementById('messageForm');
-            messageForm.addEventListener('submit', function(event) {
-                event.preventDefault();
-                const formData = new FormData(messageForm);
-                const message = formData.get('message');
-                const recipient = formData.get('recipient');
-                const file = formData.get('file');
-
-                // Handle file upload and message sending
-                const messageData = {
-                    type: 'message',
-                    sender: '{{ current_user.username }}',
-                    recipient: recipient,
-                    body: message,
-                    file: file ? file.name : null
-                };
-
-                if (file) {
-                    messageData.file = file.name;
-                }
-                
-                ws.send(JSON.stringify(messageData));
-                messageForm.reset();
-            });
-
-            // Recording Voice Message
-            let mediaRecorder;
-            const recordVoiceButton = document.getElementById('recordVoice');
-            const fileInput = document.getElementById('file');
-            recordVoiceButton.addEventListener('click', async () => {
-                if (mediaRecorder && mediaRecorder.state === 'recording') {
-                    mediaRecorder.stop();
-                    return;
-                }
-
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                mediaRecorder.start();
-
-                const audioChunks = [];
-                mediaRecorder.addEventListener('dataavailable', event => {
-                    audioChunks.push(event.data);
-                });
-
-                mediaRecorder.addEventListener('stop', () => {
-                    const audioBlob = new Blob(audioChunks);
-                    const audioUrl = URL.createObjectURL(audioBlob);
-                    const audio = new Audio(audioUrl);
-                    audio.play();
-
-                    // Create a File object from the Blob
-                    const file = new File([audioBlob], 'voice-message.wav', { type: 'audio/wav' });
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(file);
-                    fileInput.files = dataTransfer.files;
-                });
-            });
-
-            // Video Call Button
-            const videoCallButton = document.getElementById('videoCall');
-            videoCallButton.addEventListener('click', () => {
-                window.open('https://your-video-call-service.com', '_blank');  // Replace with your video call service URL
-            });
+    // Ping server every minute to update last seen time
+    setInterval(function() {
+        $.ajax({
+            url: '/status',
+            type: 'GET'
         });
-    </script>
+    }, 60000);
+
+    // Scroll to bottom of chat on page load
+    $('.chat-messages').scrollTop($('.chat-messages')[0].scrollHeight);
+
+    // Function to format timestamp
+    function formatTimestamp(timestamp) {
+        return moment(timestamp).format('HH:mm');
+    }
+
+    // Send message on enter press
+    $('#message-input').keypress(function(e) {
+        if (e.which == 13 && !e.shiftKey) {
+            e.preventDefault();
+            $('form.chat-input-form').submit();
+        }
+    });
+
+    // Update scroll position after sending a message
+    $('form.chat-input-form').submit(function() {
+        setTimeout(() => {
+            $('.chat-messages').scrollTop($('.chat-messages')[0].scrollHeight);
+        }, 100);
+    });
+});
+</script>
 {% endblock %}
