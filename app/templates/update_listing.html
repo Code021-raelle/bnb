@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-3">Update Listing</h1>
+    <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        
+        <div class="form-group">
+            {{ form.title.label(class="form-label") }}
+            {{ form.title(class="form-control", placeholder="Enter listing title") }}
+            {% if form.title.errors %}
+                <div class="text-danger">{{ form.title.errors[0] }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            {{ form.description.label(class="form-label") }}
+            {{ form.description(class="form-control", placeholder="Enter description") }}
+            {% if form.description.errors %}
+                <div class="text-danger">{{ form.description.errors[0] }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.currency.label(class="form-label") }}
+            {{ form.currency(class="form-control") }}
+            {% if form.currency.errors %}
+                <div class="text-danger">{{ form.currency.errors[0] }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.price.label(class="form-label") }}
+            {{ form.price(class="form-control", placeholder="Enter price") }}
+            {% if form.price.errors %}
+                <div class="text-danger">{{ form.price.errors[0] }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.city.label(class="form-label") }}
+            {{ form.city(class="form-control", placeholder="Enter city") }}
+            {% if form.city.errors %}
+                <div class="text-danger">{{ form.city.errors[0] }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.state_id.label(class="form-label") }}
+            {{ form.state_id(class="form-control") }}
+            {% if form.state_id.errors %}
+                <div class="text-danger">{{ form.state_id.errors[0] }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.address.label(class="form-label") }}
+            {{ form.address(class="form-control", placeholder="Enter address") }}
+        </div>
+
+        <div class="form-group">
+            {{ form.latitude.label(class="form-label") }}
+            {{ form.latitude(class="form-control", placeholder="Enter latitude") }}
+            {% if form.latitude.errors %}
+                <div class="text-danger">{{ form.latitude.errors[0] }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.longitude.label(class="form-label") }}
+            {{ form.longitude(class="form-control", placeholder="Enter longitude") }}
+            {% if form.longitude.errors %}
+                <div class="text-danger">{{ form.longitude.errors[0] }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.amenities.label(class="form-label") }}
+            {{ form.amenities(class="form-control") }}
+            {% if form.amenities.errors %}
+                <div class="text-danger">{{ form.amenities.errors[0] }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.image.label(class="form-label") }}
+            {{ form.image(class="form-control") }}
+            {% if form.image.errors %}
+                <div class="text-danger">{{ form.image.errors[0] }}</div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Update Listing</button>
+        <a href="{{ url_for('listing', listing_id=listing.id) }}" class="btn btn-secondary mt-3">Cancel</a>
+    </form>
+</div>
+{% endblock %}
