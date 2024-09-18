@@ -74,22 +74,30 @@
                                     <a href="{{ url_for('listing', listing_id=listing.id) }}">{{ listing.title }}</a>
                                 </h5>
                                 <div class="col-md-4 d-flex align-items-stretch">
-                                    <img src="{{ url_for('static', filename='images/' ~ listing.image_file) }}" class="card-img-top" alt="{{ listing.title }}">
+                                    {% if listing.images|length > 0 %}
+                                        <img src="{{ url_for('static', filename='images/' ~ listing.images[0].file_name) }}" class="card-img-top" alt="{{ listing.title }}">
+                                    {% else %}
+                                        <img src="{{ url_for('static', filename='images/default.jpg') }}" class="card-img-top" alt="{{ listing.title }}">
+                                    {% endif %}
                                 </div>
-                                <p class="card-text">{{ listing.description }}</p>
+                                <p class="card-text">{{ listing.description| truncate(100) }}</p>
                             </div>
                             <div class="card-footer">
-                                <p class="card-text"><strong>Price:</strong> {{ price_with_currency }}</p>
+                                <p class="card-text"><strong>Price:</strong> {{ listing.currency }}  {{ listing.price }} </p>
                                 <p class="card-text"><strong>Location:</strong> {{ listing.location }}</p>
-                                <p class="card-text"><strong>State:</strong> {{ listing.state }}</p>
-                                <p class="card-text"><strong>Amenities:</strong> {{ listing.amenities }}</p>
+                                <p class="card-text"><strong>State:</strong> {{ listing.state.name }}</p>
+                                <p class="card-text"><strong>Amenities:</strong>
+                                    {% for amenity in listing.amenities %}
+                                        {{ amenity.amenity.name }},
+                                    {% endfor %}
+                                </p>
                             </div>
                         </div>
                     </div>
                 {% endfor %}
             </div>
         {% else %}
-            <p>No listings found.</p>
+            <p>No listings found for "{{ search_term }}".</p>
         {% endif %}
     </div>
 {% endblock %}
