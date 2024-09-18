@@ -1,3 +1,6 @@
+* {
+    box-sizing: border-box;
+}
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -111,4 +114,15 @@ body {
     color: white;
     text-align: center;
     padding: 50px;
+}
+
+.carousel, .carousel-inner, .carousel-item {
+    width: 100%;
+    max-width: 1200px; /* Adjust as needed */
+    margin: 0 auto;
+}
+.carousel-item img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
 }
