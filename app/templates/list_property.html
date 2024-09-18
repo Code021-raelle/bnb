@@ -4,42 +4,107 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>List Your Property</title>
-    <!-- Bootstrap CSS -->
+    <title>3ple~R - List Your Property</title>
+    <!-- External CSS and Font Icons -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/list-prop.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/sign.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link rel="preload" href="{{ url_for('static', filename='images/preload.svg') }}" as="image">
-    <link rel="icon" href="{{ url_for('static', filename='images/icon.svg') }}">
-</head>
-<body>
     <style>
         body {
-            width: 100%;
-            height: 100%;
             margin: 0;
-            align-items: center;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
         .listings {
-            display: flex;
             justify-content: center;
             width: 100%;
+            padding: 0;
+            margin: 0 auto;
         }
         .carousel {
-            width: 100%; /* Adjust this value as needed */
-            max-width: 1000px; /* Set a max-width for better control */
+            width: 100%;
+            max-width: 1200px;
+            margin: 20px auto;
         }
         .carousel-item {
+            height: 500px;
+        }
+        .carousel-item img {
             width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .jumbotron {
+            background-size: cover;
+            color: #fff;
+        }
+        .footer {
+            background: #f8f9fa;
+            text-align: center;
+            padding: 20px;
+        }
+        .loading-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .video-background {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            z-index: -1;
+        }
+        /* New styles */
+        .search-bar {
+            width: 50%;
+            margin: 20px auto;
+        }
+        .filter-options {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+        }
+        .listing-card {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease-in-out;
+        }
+        .listing-card:hover {
+            transform: translateY(-10px);
+        }
+        .price-tag {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background-color: #007bff;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
         }
     </style>
+</head>
+<body>
+    <!-- Navbar Section -->
     <header>
+        <strong>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <a class="navbar-brand" href="{{ url_for('home') }}">
-                <img src="{{ url_for('static', filename='images/icon.svg') }}" width="30" height="30" class="d-inline-block align-top" alt="">
-                Bed & Breakfast
+                <img src="{{ url_for('static', filename='images/icon.svg') }}" width="30" height="30" alt="3ple~R Logo">
+                3ple~R
             </a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -47,115 +112,18 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('home') }}">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('set_currency') }}">USD</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('listings') }}">Listings</a>
-                    </li>
-                    {% if current_user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('inbox') }}">
-                            <i class="fas fa-inbox"></i>
+                        <a class="nav-link" href="/help-center" aria-label="Help Center">Help
+                            <i class="fas fa-question-circle"></i>
                         </a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fas fa-user"></i>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="profileDropdown">
-                            <a class="dropdown-item" href="{{ url_for('profile', username=current_user.username) }}">{{ current_user.full_name }}</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="{{ url_for('profile', username=current_user.username) }}">Profile</a>
-                            <a class="dropdown-item" href="{{ url_for('new_listing') }}">List your property</a>
-                            <a class="dropdown-item" href="{{ url_for('set_currency' )}}">Set Currency</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a>
-                        </div>
-                    </li>
-                    {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('login') }}">Sign in</a>
-                    </li>
-                    {% endif %}
                 </ul>
             </div>
         </nav>
+        </strong>
     </header>
 
-    <section class="listings">
-        <div class="container-fluid">
-            <h2 class="text-center mb-4">Featured Listings</h2>
-            <div id="listingCarousel" class="carousel slide" data-ride="carousel">
-                <ol class="carousel-indicators">
-                    <li data-target="#listingCarousel" data-slide-to="0" class="active"></li>
-                    <li data-target="#listingCarousel" data-slide-to="1"></li>
-                    <li data-target="#listingCarousel" data-slide-to="2"></li>
-                    <!-- Add more indicators as needed -->
-                </ol>
-                <div class="carousel-inner">
-                    <!-- First slide -->
-                    <div class="carousel-item active">
-                        <div class="card">
-                            <img src="{{ url_for('static', filename='images/maryland.jpg') }}" class="card-img-top" alt="Listing 1">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">Listing 1 Title</h5>
-                                <p class="card-text">Short description of the first listing.</p>
-                                <a href="#" class="btn btn-primary">View Listing</a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Second slide -->
-                    <div class="carousel-item">
-                        <div class="card">
-                            <img src="{{ url_for('static', filename='images/apartment.jpg') }}" class="card-img-top" alt="Listing 2">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">Listing 2 Title</h5>
-                                <p class="card-text">Short description of the second listing.</p>
-                                <a href="#" class="btn btn-primary">View Listing</a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Third slide -->
-                    <div class="carousel-item">
-                        <div class="card">
-                            <img src="{{ url_for('static', filename='images/home.jpg') }}" class="card-img-top" alt="Listing 3">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">Listing 3 Title</h5>
-                                <p class="card-text">Short description of the third listing.</p>
-                                <a href="#" class="btn btn-primary">View Listing</a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Add more slides as needed -->
-                </div>
-                <a class="carousel-control-prev" href="#listingCarousel" role="button" data-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="sr-only">Previous</span>
-                </a>
-                <a class="carousel-control-next" href="#listingCarousel" role="button" data-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="sr-only">Next</span>
-                </a>
-            </div>
-        </div>
-        <div id="mapContainer" style="width: 100%; height: 400px;"></div>
-
-    </section>
-
-    <!-- Video element --
-    <video autoplay muted loop class="video-background">
-        <source src="{{ url_for('static', filename='images/vid/BnB_shortlet.mp4') }}" type="video/mp4">
-        Your browser does not support the video tag.
-    </video-->
-    
-    <div class="container-fluid bg-primary text-white text-center py-5">
-        <h1>Welcome to Our Property Listing</h1>
-    </div>
-
-    <div class="jumbotron jumbotron-fluid text-center" style="background-image: url('/static/images/property-listing-bg.jpg'); background-size: cover; color: white;">
+    <!-- Call to Action Section -->
+    <div class="jumbotron jumbotron-fluid text-center" style="background-image: url('/static/images/property-listing-bg.jpg');">
         <div class="container">
             <h1 class="display-4">Reach Millions of Potential Buyers and Renters</h1>
             <p class="lead">It's easy and fast to list your property with us. Start now!</p>
@@ -163,48 +131,64 @@
         </div>
     </div>
 
+    <!-- Steps Section -->
     <div class="container my-5">
-        <div class="row">
+        <div class="row text-center">
             <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h2 class="card-title">Step 1: Sign Up</h2>
-                        <p class="card-text">Create an account or log in to get started.</p>
-                    </div>
-                </div>
+                <i class="fas fa-edit fa-3x"></i>
+                <h4>Step 1: Sign Up or Login</h4>
+                <p>Create an account or log in to start listing your property.</p>
             </div>
             <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h2 class="card-title">Step 2: Add Property Details</h2>
-                        <p class="card-text">Enter the details of your property including location, price, and features.</p>
-                    </div>
-                </div>
+                <i class="fas fa-list-alt fa-3x"></i>
+                <h4>Step 2: Create Your Listing</h4>
+                <p>Fill in the details of your property with photos and descriptions.</p>
             </div>
             <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h2 class="card-title">Step 3: Publish</h2>
-                        <p class="card-text">Review your listing and publish it to be visible to potential renters or buyers.</p>
+                <i class="fas fa-check fa-3x"></i>
+                <h4>Step 3: Start Getting Bookings</h4>
+                <p>Your property will be visible to millions of potential renters and buyers.</p>
+            </div>
+        </div>
+    </div>
+        
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>About Us</h5>
+                    <p>We're a platform connecting travelers with unique accommodations worldwide.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Help Center</h5>
+                    <ul>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Contact Support</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Follow Us</h5>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
                     </div>
                 </div>
             </div>
         </div>
+    </footer>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen">
+        <img src="{{ url_for('static', filename='images/loading.gif') }}" alt="Loading">
     </div>
 
-    <div class="footer">
-        <p>&copy; 2024 BnB. All rights reserved.</p>
-    </div>
-
-    <!-- Loading screen -->
-    <div id="loading-screen" class="loading-screen">
-        <img src="{{ url_for('static', filename='images/preload.svg') }}" alt="Loading...">
-    </div>
-
-    <!-- Bootstrap JS and dependencies -->
-    <script src="{{ url_for('static', filename='scripts/list-prop.js') }}"></script>
+    <!-- External Scripts -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
 </body>
 </html>
