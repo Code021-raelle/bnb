@@ -29,7 +29,58 @@
     .star-rating {
         color: #FFD700;
     }
+    .sidebar-wrapper {
+        display: flex;
+        min-height: 100vh;
+    }
+    .sidebar {
+        width: 250px;
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-right: 1px solid #dee2e6;
+    }
+    .main-content {
+        flex-grow: 1;
+        padding: 20px;
+    }
+    @media (max-width: 768px) {
+        .sidebar-wrapper {
+            flex-direction: column;
+        }
+        .sidebar {
+            width: 100%;
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 20px;
+        }
+    }
 </style>
+
+<div class="sidebar-wrapper">
+    <div class="sidebar">
+        <h2>Filter Bar</h2>
+        <form>
+            <div class="form-group">
+                <label for="price-range">Price Range:</label>
+                <input type="range" class="form-control-range" id="price-range" min="0" max="10000" value="5000">
+                <div class="d-flex justify-content-between">
+                    <small>$0</small>
+                    <small>$10,000</small>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="amenities">amenities</label>
+                <select multiple class="form-control" id="amenities">
+                    <option>Wi-Fi</option>
+                    <option>Parking</option>
+                    <option>Pool</option>
+                    <option>Gym</option>
+                    <option>Pet-friendly</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Apply Filters</button>
+        </form>
+    </div>
+</div>
 
 <div class="mt-4">
     {% if listing %}
@@ -38,12 +89,12 @@
             <!-- Image Section -->
             {% for image in listing.images %}
                 <div class="listing-image col-md-4 d-flex align-items-stretch mb-3">
-                    <img src="{{ url_for('static', filename='images/' ~ listing.images[0].file_name) }}" class="card-img-top" alt="{{ listing.title }}">
+                    <img src="{{ url_for('static', filename='images/' ~ listing.images.file_name) }}" class="card-img-top img-fluid" alt="{{ listing.title }}">
                 </div>
             {% endfor %}
 
             <!-- Listing Details Section -->
-            <div class="listing-info">
+            <div class="listing-info text-dark">
                 <p class="mt-3">{{ listing.description }}</p>
                 <p><strong>Price:</strong> {{ price_with_currency }}</p>
                 <p><strong>Location:</strong> {{ listing.location }}</p>
@@ -52,6 +103,13 @@
                         {{ amenity.amenity.name }},
                     {% endfor %}
                 </p>
+                {% if current_user.is_authenticated and current_user.id == listing.user.id %}
+                    <p><strong>Posted by:</strong> <b>Me</b></p>
+                {% else %}
+                    <p><strong>Posted by:</strong>
+                        <a href="{{ url_for('chat', username=listing.user.username) }}" class="text-decoration-none text-dark">{{ listing.user.full_name }} <span class="me-2"><i class="fas fa-comments"></i></span></a>
+                    </p>
+                {% endif %}
                 <p><strong>Posted on:</strong> {{ listing.date_posted }}</p>
                 <h2 class="mt-4">Location</h2>
                 <div id="map" style="height: 400px; border-radius: 8px;"></div>
@@ -80,7 +138,9 @@
                 <div class="col-md-4 mb-4">
                     <div class="card review-card h-100">
                         <div class="card-body">
-                            <p><strong><i>{{ review.user.username }}</i></strong>
+                            <p><strong><i>
+                                <a class="text-white" href="{{ url_for('profile', username=review.user.username) }}">{{ review.user.username }}</a>
+                            </i></strong>
                                 <span class="star-rating">
                                     {% for i in range(review.rating) %}
                                         <i class="fas fa-star"></i>
@@ -144,7 +204,10 @@
             </div>
             <div class="form-group"></div>
                 <label for="address" class="form-label">Address</label>
-                <input type="text" id="address" name="address" class="form-control" placeholder="Enter full address">
+                <div style="position: relative;">
+                    <input type="text" id="address" name="address" class="form-control" placeholder="Enter full address"> 
+                    <div id="suggestions-box"></div>
+                </div>
             </div>
             <div class="form-group">
                 <label for="city" class="form-label">City</label>
@@ -160,6 +223,7 @@
             </div>
             <div id="map" style="height: 400px; border-radius: 8px;"></div>
             <div id="geocoder-container"></div>
+            <div id="suggestions-box"></div>
             {{ form.submit(class="btn btn-primary mt-4") }}
         </form>    
 
@@ -169,6 +233,8 @@
 <script>
     if (!window.MapboxGeocoder) {
         console.error('MapboxGeocoder not loaded');
+    } else {
+        console.log('MapboxGeocoder loaded successfully');
     }
 
     // Initialize the map with Mapbox
@@ -179,7 +245,7 @@
         container: 'map',
         style: 'mapbox://styles/mapbox/streets-v11',
         center: [{{ listing.longitude if listing else -122.084051 }}, {{ listing.latitude if listing else 37.385348 }}],
-        zoom: 13
+        zoom: 15
     });
 
     {% if listing %}
@@ -227,6 +293,70 @@
 
     geocoder.addTo('#geocoder-container');
 
+    // Function to fetch suggestions from Mapbox Geocoding API
+    const addressInput = document.getElementById('address');
+    addressInput.addEventListener('input', function () {
+        console.log('Address input changed:', addressInput.value);
+        const query = addressInput.value.trim();
+        if (query.length > 0) {
+            fetch(`https://api.mapbox.com/search/searchbox/v1/suggest?q=${query}&access_token=pk.eyJ1IjoicmFlbGxlcyIsImEiOiJjbHl1M3Fzc2cweXVwMnFzNm5xeGlna213In0.ENF47rwSL_wPYu-SWfhI4Q&session_token=c856ad82-2fdf-487a-b890-3d37fb61e1f1&language=en&limit=10&types=country%2Cregion%2Cdistrict%2Cpostcode%2Clocality%2Cplace%2Cneighborhood%2Caddress%2Cpoi%2Cstreet%2Ccategory&proximity=3.3792057%2C6.5243793`)
+            .then(response => {
+                console.log('Response received:', response);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Data received:', data);
+                if (data.suggestions) {
+                    showSuggestions(data.suggestions);
+                } else {
+                    suggestionsBox.innerHTML = `<div class="suggestion-item">No results found</div>`;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching suggestions:', error);
+            });
+        } else {
+            suggestionsBox.innerHTML = '';
+        }
+    });
+
+    // Function to show suggestions
+    function showSuggestions(suggestions) {
+        console.log('Showing suggestions:', suggestions);
+        const suggestionsBox = document.getElementById('suggestions-box');
+        suggestionsBox.innerHTML = '';
+        
+        suggestions.forEach(suggestion => {
+            const suggestionItem = document.createElement('div');
+            suggestionItem.className = 'suggestion-item';
+            suggestionItem.textContent = suggestion.text;
+            
+            // Add event listener to suggestion item
+            suggestionItem.addEventListener('click', () => {
+                const selectedAddress = suggestion.text;
+                addressInput.value = selectedAddress;
+                
+                // Update map and other inputs based on selected suggestion
+                fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(selectedAddress)}.json?access_token=pk.eyJ1IjoicmFlbGxlcyIsImEiOiJjbHl1M3Fzc2cweXVwMnFzNm5xeGlna213In0.ENF47rwSL_wPYu-SWfhI4Q&session_token=c856ad82-2fdf-487a-b890-3d37fb61e1f1&language=en&limit=10`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.features && data.features.length > 0) {
+                        const feature = data.features[0];
+                        updateMapAndInputs(feature.center);
+                        document.getElementById('city').value = feature.place_name.split(',')[0];
+                        document.getElementById('address').value = feature.place_name;
+                    }
+                })
+                .catch(error => console.error('Error fetching geocoding data:', error));
+                
+                // Hide suggestions box
+                suggestionsBox.innerHTML = '';
+            });
+            
+            suggestionsBox.appendChild(suggestionItem);
+        });
+    }
+
     // Function to update map and inputs based on coordinates
     function updateMapAndInputs(lngLat) {
         map.setCenter(lngLat);
@@ -234,66 +364,55 @@
 
         document.getElementById('longitude').value = lngLat[0].toFixed(6);
         document.getElementById('latitude').value = lngLat[1].toFixed(6);
-
-        // Reverse geocode to get city and address
-        fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${lngLat[0]},${lngLat[1]}.json?access_token=${mapboxgl.accessToken}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.features && data.features.length > 0) {
-                    const feature = data.features[0];
-                    document.getElementById('city').value = feature.place_name.split(',')[0];
-                    document.getElementById('address').value = feature.place_name;
-                }
-            })
-            .catch(error => console.error('Error reverse geocoding:', error));
     }
 
-    // Add event listeners for manual input
-    ['address', 'city'].forEach(id => {
-        document.getElementById(id).addEventListener('input', debounce(function() => {
-            const address = document.getElementById('address').value.trim();
-            const city = document.getElementById('city').value.trim();
-
-            if (address || city) {
-                fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}${city ? `,${encodeURIComponent(city)}` : ''}.json?access_token=${mapboxgl.accessToken}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.features && data.features.length > 0) {
-                            const feature = data.features[0];
-                            updateMapAndInputs(feature.center);
-                        }
-                    })
-                    .catch(error => console.error('Error fetching geocoding data:', error));
-            }
-        }, 500));
+    // Event listener to price range slider
+    document.getElementById('price-range').addEventListener('input', function() {
+        const priceValue = this.value;
+        console.log(`Price range selected: $${priceValue}`);
     });
 
-    // Add event listener for latitude and longitude inputs
-    ['latitude', 'longitude'].forEach(id => {
-        document.getElementById(id).addEventListener('input', debounce(function() {
-            const lat = parseFloat(document.getElementById('latitude').value);
-            const lng = parseFloat(document.getElementById('longitude').value);
-            if (!isNaN(lat) && !isNaN(lng)) {
-                updateMapAndInputs([lng, lat]);
-                map.setZoom(14);
-            }
-        }, 500));
+    // Event listener to amenities select
+    document.getElementById('amenities').addEventListener('change', function() {
+        const selectedAmenities = Array.from(this.selectedOptions).map(option => option.text);
+        console.log(`Selected amenities: ${selectedAmenities.join(', ')}`);
     });
 
-    // Debounce function to limit API calls
-    function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
+    const listings = [];
+    const filteredListings = [...listings];
+
+    function applyFilters() {
+        const priceRange = document.getElementById('price-range').value;
+        const selectedAmenities = Array.from(document.getElementById('amenities').selectedOptions).map(option => option.text);
+
+        filteredListings.length = 0;
+
+        listings.forEach(listing => {
+            const priceInRange = listing.price <= parseInt(priceRange);
+            const hasSelectedAmenities = selectedAmenities.every(amenity => listing.amenities.includes(amenity));
+
+            if (priceInRange && hasSelectedAmenities) {
+                filteredListings.push(listing);
+            }
+        });
+
+        renderListings(filteredListings);
     }
+
+    document.querySelector('.sidebar form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        applyFilters();
+    });
+
+    function renderListings(listings) {
+        console.log('Rendering:', listings);
+    }
+
+    renderListings(filteredListings);
+
+    document.getElementById('price-range').addEventListener('input', applyFilters);
+    document.getElementById('amenities').addEventListener('change', applyFilters);
 });
 </script>
 
-<div id="geocoder-container"></div>
 {% endblock %}
