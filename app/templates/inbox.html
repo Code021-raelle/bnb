@@ -55,7 +55,7 @@
         }
     </style>
 
-    <h1 class="text-center mt-4">My Inbox</h1>
+    <h1 class="text-center mt-4">{{ current_user.username }}'s Inbox</h1>
     <div class="card-inbox list-group">
         {% for message in messages %}
             <div class="card-inbox list-group-item">
