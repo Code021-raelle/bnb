@@ -33,6 +33,14 @@
             {{ form.email(class="form-control") }}
         </div>
         <div class="form-group">
+            {{ form.country_code.label(class="form-label") }}
+            {{ form.country_code(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.phone_number.label(class="form-label") }}
+            {{ form.phone_number(class="form-control") }}   
+        </div>
+        <div class="form-group">
             {{ form.about_me.label(class="form-label") }} 
             {{ form.about_me(class="form-control") }}
         </div>
