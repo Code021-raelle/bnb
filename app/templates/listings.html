@@ -88,7 +88,7 @@
                             {% endif %}
                             <div class="card-body d-flex flex-column">
                                 <h5 class="card-title">{{ listing.title }}</h5>
-                                <p><strong>Price:</strong> {{ listing.price }} {{ listing.currency }}</p>
+                                <p><strong>Price:</strong> {{ listing.currency }} {{ listing.price }}</p>
                                 <p class="card-text"><strong>State:</strong> {{ listing.state.name }}</p>
                                 <p class="card-text">{{ listing.description | truncate(50) }}</p>
                                 <div class="mt-auto">
