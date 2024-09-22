@@ -70,8 +70,10 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('login') }}">Sign in</a>
                     </li>
-                    
                     {% endif %}
+                    {% for lang in LANGUAGES %}
+                        <a href="{{ url_for(request.endpoint, lang=lang) }}">{{ lang }}</a>
+                    {% endfor %}
                 </ul>
                 <div class="navbar-center">
                     <form class="form-inline my-2 my-lg-0 search-bar" method="GET" action="{{ url_for('search') }}">
