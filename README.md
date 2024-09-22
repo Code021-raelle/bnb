@@ -32,7 +32,7 @@ The application follows a modular design with a clear separation of concerns bet
 ## Technologies Used
 * Frontend:
 * * HTML5, CSS3, JavaScript
-* * Bootstrap 5 for responsive design
+  * Bootstrap 5 for responsive design
 * Backend:
 * * Python (Flask) for the routes and REST API
 * * MariaDB/MySQL for relational database management
@@ -53,7 +53,7 @@ The application follows a modular design with a clear separation of concerns bet
 ### Property owners
 * Sign up or log in to list properties, set prices and manage bookings.
 * Communicate directly with potential guests through the integrated messaging system.
-# Guests
+### Guests
 * Browse properties, filter by location, price and amenities.
 * Make a booking, manage reservations and leave reviews for properties you've stayed in.
 
