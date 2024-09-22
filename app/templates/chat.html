@@ -6,7 +6,8 @@
         <div class="col-md-12">
             <div class="chat-container">
                 <div class="chat-header">
-                    <h5>{{ user.username }}</h5>
+                    <h5>
+                        <a class="text-dark" href="{{ url_for('profile', username=user.username) }}">{{ user.username }}</a></h5>
                     <small id="status-indicator">{{ user.last_seen.status }}</small>
                 </div>
 
