@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h1 class="mb-3">Update Listing</h1>
+    <h1 class="mb-3">Update {{ listing.title }}</h1>
     <form method="POST" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
         
@@ -90,6 +90,8 @@
                 <div class="text-danger">{{ form.image.errors[0] }}</div>
             {% endif %}
         </div>
+
+        <!--div id="map" style="height: 400px; border-radius: 10px;"></div-->
 
         <button type="submit" class="btn btn-primary mt-3">Update Listing</button>
         <a href="{{ url_for('listing', listing_id=listing.id) }}" class="btn btn-secondary mt-3">Cancel</a>
