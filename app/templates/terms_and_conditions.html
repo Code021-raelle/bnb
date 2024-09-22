@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terms & Conditions - Bed & Breakfast</title>
+    <title>Terms & Conditions - 3ple~R</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
@@ -16,13 +16,16 @@
             background: url(../static/images/terms.svg) no-repeat center;
             background-size: cover;
         }
+        .home {
+            padding: 7rem;
+        }
     </style>
-    <div class="container-fluid p-0">
         <!-- Navigation Bar -->
         <header>
+            <strong>
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
-                <a class="navbar-brand" href="/">
-                    <img src="{{ url_for('static', filename='images/icon.svg') }}" width="30" height="30" class="d-inline-block align-top" alt="">
+                <a class="navbar-brand" href="{{ url_for('home') }}">
+                    <img src="{{ url_for('static', filename='images/icon.svg') }}" width="30" height="30" alt="3ple~R Logo">
                     3ple~R
                 </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,29 +34,21 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ml-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="/">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/listings">Listings</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/list-your-property">List Your Property</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/help-center" aria-label="Help Center">
+                            <a class="nav-link" href="/help-center" aria-label="Help Center">Help
                                 <i class="fas fa-question-circle"></i>
                             </a>
                         </li>
                     </ul>
                 </div>
             </nav>
+            </strong>
         </header>
 
         <!-- Terms & Conditions Header -->
-        <section class="jumbotron text-center mb-0">
-            <div class="container">
+        <section class="jumbotron jumbotron-fluid text-center">
+            <div class="container home" style="top: 4rem;">
                 <h1 class="jumbotron-heading">Terms & Conditions</h1>
-                <p class="lead text-muted">Please read these terms and conditions carefully before using our services.</p>
+                <p class="lead">Please read these terms and conditions carefully before using our services.</p>
             </div>
         </section>
 
@@ -91,17 +86,17 @@
                 <p>These terms are governed by and construed in accordance with the laws of the jurisdiction where our company is registered. Any disputes will be subject to the exclusive jurisdiction of the courts in that jurisdiction.</p>
 
                 <h2>11. Contact Us</h2>
-                <p>If you have any questions about these terms, please contact us at <a href="mailto:support@bnb.com">support@bnb.com</a>.</p>
+                <p>If you have any questions about these terms, please contact us at <a href="mailto:support@3ple~R.com">support@3ple~R.com</a>.</p>
             </div>
         </section>
 
         <!-- Footer -->
         <footer class="bg-dark text-white text-center py-3">
-            <p>&copy; {{ current_year }} 3ple~R - All Rights Reserved</p>
+            <p>&copy; 3ple~R {{ current_year }} - All Rights Reserved</p>
             <p>
                 <a href="/privacy-&-policy" class="text-white mx-2">Privacy Policy</a> | 
                 <a href="/terms-and-conditions" class="text-white mx-2">Terms of Service</a> | 
-                <a href="mailto:support@bnb.com" class="text-white mx-2">Contact Us</a>
+                <a href="mailto:support@b3ple~R.com" class="text-white mx-2">Contact Us</a>
             </p>
         </footer>
     </div>
