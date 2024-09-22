@@ -1,10 +1,10 @@
-from flask import render_template, url_for, flash, redirect, request, jsonify, current_app, make_response
+from flask import render_template, url_for, flash, redirect, request, jsonify, current_app, make_response, session
 from app import app, db, bcrypt, oauth, socketio
 from decimal import Decimal
 from flask_socketio import SocketIO, emit
 from app.forms import (RegistrationForm, LoginForm, ListingForm, SearchForm, BookingForm,
                         ReviewForm, MessageForm, EditProfileForm, PreferredCurrencyForm,
-                        ResetPasswordForm, RequestResetForm)
+                        ResetPasswordForm, RequestResetForm, UpdateUserForm)
 from app.models import User, Listing, Review, Message, Booking, Chat, State, Amenity, ListingAmenity, Image
 from flask_login import login_user, current_user, logout_user, login_required
 from werkzeug.security import check_password_hash
@@ -205,6 +205,7 @@ def privacy_policy():
 
 @app.route("/search", methods=['GET', 'POST'])
 def search():
+    form = SearchForm()
     search_term = request.args.get('q', '')  # Default to an empty string if no query is provided
     min_price = request.args.get('min_price')
     max_price = request.args.get('max_price')
@@ -225,9 +226,13 @@ def search():
     if amenities:
         for amenity in amenities:
             query = query.filter(Listing.amenities.contains(amenity.strip()))
+    if form.check_in.data and form.check_out.data:
+        query = query.outerjoin(Booking).group_by(Listing.id).having(
+            db.func.count(db.case([(db.and_(Booking.start_date > form.check_out.data, Booking.end_date < form.check_in.data), 1)], else_=0)) == 0
+        )
 
     listings = query.all()
-    return render_template('search_results.html', listings=listings, search_term=search_term)
+    return render_template('search_results.html', listings=listings, search_term=search_term, form=form)
 
 
 @app.route("/user/<string:username>")
@@ -323,25 +328,32 @@ def add_review(listing_id):
     return render_template('review.html', title='Add Review', form=form, listing=listing)
 
 
-@app.route("/profile/<username>")
+@app.route("/profile/<username>", methods=['GET', 'POST'])
 @login_required
 def profile(username):
     user = User.query.filter_by(username=username).first_or_404()
-    return render_template('profile.html', title=f'{user.username}\'s Profile', user=user)
+    form = UpdateUserForm(obj=user)
+    if form.validate_on_submit():
+        form.populate_obj(user)
+        db.session.commit()
+        flash('Profile updated successfully!', 'success')
+    return render_template('profile.html', title=f'{user.username}\'s Profile', user=user, form=form)
 
 @app.route("/edit_profile", methods=['GET', 'POST'])
 @login_required
 def edit_profile():
-    form = EditProfileForm()
+    form = EditProfileForm(obj=current_user)
     if form.validate_on_submit():
         current_user.username = form.username.data
         current_user.first_name = form.first_name.data
         current_user.last_name = form.last_name.data
         current_user.email = form.email.data
         current_user.about_me = form.about_me.data
+        current_user.country_code = form.country_code.data
+        current_user.phone_number = form.phone_number.data
 
-        if form.picture.data:
-            picture_file = save_picture(form.picture.data)
+        if form.image.data:
+            picture_file = save_picture(form.image.data)
             current_user.image_file = picture_file
         
         db.session.commit()
@@ -354,8 +366,8 @@ def edit_profile():
         form.email.data = current_user.email
         form.about_me.data = current_user.about_me
         #form.image_file.data = current_user.image_file
-    image_file = url_for('static', filename='images/' + current_user.image_file)
-    return render_template('edit_profile.html', title='Edit Profile', form=form, image_file=image_file)
+    image_url = url_for('static', filename='images/' + current_user.image_file)
+    return render_template('edit_profile.html', title='Edit Profile', form=form, image_url=image_url)
 
 
 @app.route('/list-your-property')
@@ -384,6 +396,7 @@ def new_listing():
             owner=current_user,
             currency=form.currency.data,
             price=form.price.data,
+            country=form.country.data,
             city=form.city.data,
             state_id=form.state_id.data,
             address=form.address.data,
@@ -525,17 +538,39 @@ def book_listing(listing_id):
     listing = Listing.query.get_or_404(listing_id)
     form = BookingForm()
     if form.validate_on_submit():
-        booking = Booking(
-            start_date=form.start_date.data,
-            end_date=form.end_date.data,
-            user=current_user,
-            listing=listing
-        )
-        db.session.add(booking)
-        db.session.commit()
-        flash('Your booking has been created!', 'success')
-        return redirect(url_for('listings'))
+        if listing.is_available(form.start_date.data, form.end_date.data):
+            booking = Booking(
+                start_date=form.start_date.data,
+                end_date=form.end_date.data,
+                user=current_user,
+                listing=listing
+            )
+            db.session.add(booking)
+            db.session.commit()
+            flash('Booking confirmed!', 'success')
+            return redirect(url_for('listings'))
+        else:
+            flash('Listing is not available for the selected dates.', 'danger')
     return render_template('book_listing.html', title='Book Listing', form=form, listing=listing)
+
+
+@app.route('/bookings')
+@login_required
+def bookings():
+    bookings = Booking.query.filter_by(user=current_user).all()
+    return render_template('bookings.html', title='Bookings', bookings=bookings)
+
+
+@app.route('/booking/<int:booking_id>/cancel', methods=['POST'])
+@login_required
+def cancel_booking(booking_id):
+    booking = Booking.query.get_or_404(booking_id)
+    if booking.user != current_user:
+        abort(403)
+    db.session.delete(booking)
+    db.session.commit()
+    flash('Booking cancelled.', 'success')
+    return redirect(url_for('bookings'))
 
 
 @app.route('/set_currency', methods=['GET', 'POST'])
