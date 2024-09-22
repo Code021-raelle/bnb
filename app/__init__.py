@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request, session
 from flask_admin import Admin
 from flask_socketio import SocketIO, emit
 from flask_admin.contrib.sqla import ModelView
@@ -9,6 +9,7 @@ from flask_login import LoginManager
 from flask_dance.contrib.google import make_google_blueprint, google
 from flask_dance.contrib.facebook import make_facebook_blueprint, facebook
 from authlib.integrations.flask_client import OAuth
+#from flask_babelex import Babel, lazy_gettext as _
 import stripe
 import os
 
@@ -22,6 +23,8 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # Maximum file size, e.g., 1
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
+#babel = Babel(app)
+#babel.init_app(app)
 socketio = SocketIO(app)
 migrate = Migrate(app, db)
 login_manager = LoginManager(app)
@@ -46,5 +49,19 @@ oauth.register(
     access_token_params=None,
     client_kwargs={'scope': 'name email'}
 )
+
+#@babel.localeselector
+#def get_locale():
+    # Determine the locale from the user preferences stored in the session
+    #override = request.args.get('lang')
+    #if override:
+        #session['lang'] = override
+    #return session.get('lang', 'en')
+
+# Default locale
+#babel.default_locale = 'en'
+
+# Supported languages
+#babel.supported_locales = ['en', 'es', 'fr']
 
 from app import routes, models, forms, admin
