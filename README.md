@@ -19,6 +19,7 @@ The 3ple~R Management System is a web application designed to streamline the pro
 * [Database Schema](#database-schema)
 * [Challenges and Improvements](#challenges-and-improvements)
 * [Contributing](#contributing)
+* [Authors](#author)
 * [License](#license)
 
 ## Architecture
@@ -31,15 +32,15 @@ The application follows a modular design with a clear separation of concerns bet
 
 ## Technologies Used
 * Frontend:
-* * HTML5, CSS3, JavaScript
+  * HTML5, CSS3, JavaScript
   * Bootstrap 5 for responsive design
 * Backend:
-* * Python (Flask) for the routes and REST API
-* * MariaDB/MySQL for relational database management
+  * Python (Flask) for the routes and REST API
+  * MariaDB/MySQL for relational database management
 * Other Services:
-* * Cloud storage (e.g., Render) for managing property images
-* * Messaging service for real-time chat between users
-* * Email notification services for booking confirmations
+  * Cloud storage (e.g., Render) for managing property images
+  * Messaging service for real-time chat between users
+  * Email notification services for booking confirmations
 
 ## Installation
 * Clone this repository: `git clone "https://github.com/Code021-raelle/bnb.git"`
@@ -79,12 +80,12 @@ flask db upgrade
 
 ## Challenges and Improvements
 * Challenges:
-+ Integrating the real-time chat features presented challenges with managing asynchronous communication.
-+ Optimizing database queries to ensure quick response times with complex filters (e.g., by amenities, price or location).
+  + Integrating the real-time chat features presented challenges with managing asynchronous communication.
+  + Optimizing database queries to ensure quick response times with complex filters (e.g., by amenities, price or location).
 * Improvements:
-+ Enhance the UI/UX to make the booking and review process more intuitive.
-+ Add support for more payment gateways to facilitate bookings.
-+ Implement a mobile app to extend the platform's usability.
+  + Enhance the UI/UX to make the booking and review process more intuitive.
+  + Add support for more payment gateways to facilitate bookings.
+  + Implement a mobile app to extend the platform's usability.
 
 ## Contributing
 We welcome contributions to the project~ To contribute, follow these steps:
