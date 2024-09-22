@@ -27,6 +27,8 @@ class User(db.Model, UserMixin):
     oauth_provider = db.Column(db.String(50), nullable=True)
     oauth_provider_user_id = db.Column(db.String(255), nullable=True)
     listings = db.relationship('Listing', backref='owner', lazy=True)
+    bookings = db.relationship('Booking', back_populates='user', lazy=True)
+    phone_number = db.Column(db.String(255), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
     member_since = db.Column(db.DateTime, default=datetime.utcnow)
     message_sent = db.relationship('Message', backref='sender', lazy=True, foreign_keys='Message.sender_id')
@@ -88,13 +90,20 @@ class Listing(db.Model):
     price = db.Column(db.Numeric, nullable=False)
     currency = db.Column(db.String(3), default='USD')
     location = db.Column(db.String(100), nullable=False)
+    country = db.Column(db.String(64), nullable=False)
     address = db.Column(db.String(100), nullable=False)
     state_id = db.Column(db.Integer, db.ForeignKey('state.id'), nullable=True)
     city = db.Column(db.String(50), nullable=False)
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
+    bookings = db.relationship('Booking', backref='listing_bookings', lazy=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = relationship('User', back_populates='listings')
     amenities = db.relationship('ListingAmenity', back_populates='listing')
+
+    @property
+    def owner(self):
+        return User.query.get(self.user_id)
 
     def __repr__(self):
         return f"Listing('{self.title}', '{self.date_posted}')"
@@ -125,9 +134,8 @@ class Amenity(db.Model):
 
 class ListingAmenity(db.Model):
     __tablename__ = 'listing_amenity'
-    id = db.Column(db.Integer, primary_key=True)
-    listing_id = db.Column(db.Integer, db.ForeignKey('listing.id'), nullable=False)
-    amenity_id = db.Column(db.Integer, db.ForeignKey('amenity.id'), nullable=False)
+    listing_id = db.Column(db.Integer, db.ForeignKey('listing.id'), primary_key=True)
+    amenity_id = db.Column(db.Integer, db.ForeignKey('amenity.id'), primary_key=True)
     listing = db.relationship('Listing', back_populates='amenities')
     amenity = db.relationship('Amenity', back_populates='listings')
 
@@ -140,14 +148,26 @@ class Booking(db.Model):
     start_date = db.Column(db.DateTime, nullable=False)
     end_date = db.Column(db.DateTime, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship('User', foreign_keys=[user_id], back_populates='bookings')
     listing_id = db.Column(db.Integer, db.ForeignKey('listing.id'), nullable=False)
     date_booked = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-    listing = db.relationship('Listing', backref=db.backref('bookings', lazy=True))
-    user = relationship('User', backref='bookings')
+    listings = db.relationship('Listing', backref='listing_bookings', lazy=True)
+    user = db.relationship('User', foreign_keys=[user_id], back_populates='bookings')
 
     def __repr__(self):
         return f"<Booking {self.start_date} to {self.end_date} for listing {self.listing_id}>"
+    
+
+def is_available(self, start_date, end_date):
+    overlapping_bookings = self.bookings.filter(
+        db.or_(
+            db.and_(Booking.start_date <= start_date, Booking.end_date >= start_date),
+            db.and_(Booking.start_date <= end_date, Booking.end_date >= end_date),
+            db.and_(start_date <= Booking.start_date, end_date >= Booking.end_date)
+        )
+    ).all()
+    return len(overlapping_bookings) == 0
 
 
 class Review(db.Model):
